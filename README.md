@@ -175,7 +175,7 @@ This generates a comprehensive form summary report with:
 
 ## 🧪 Testing
 
-The project includes comprehensive API testing scripts:
+The project includes API testing scripts for debugging and exploration:
 
 ```bash
 # Test basic API functionality
@@ -184,6 +184,8 @@ python test_api.py
 # Test SmartLists API endpoints
 python test_smartlists_api.py
 ```
+
+These scripts help validate API connectivity and troubleshoot issues with specific Formstack endpoints.
 
 ## 📊 Key Metrics & Analytics
 
