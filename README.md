@@ -181,11 +181,8 @@ The project includes comprehensive API testing scripts:
 # Test basic API functionality
 python test_api.py
 
-# Test folder structure
-python test_portal_api.py
-
-# Test portal users
-python test_portal_users_detailed.py
+# Test SmartLists API endpoints
+python test_smartlists_api.py
 ```
 
 ## 📊 Key Metrics & Analytics
@@ -217,7 +214,6 @@ The application integrates with multiple Formstack API endpoints:
 - **Confirmations API**: `/api/v2/forms/{id}/confirmations`
 - **Notifications API**: `/api/v2/forms/{id}/notifications`
 - **SmartLists API**: `/api/v2/smartlists`
-- **Portal API**: `/api/v2/portal`
 
 ## 🏗️ Application Architecture
 
@@ -279,7 +275,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - API rate limiting may affect large-scale data retrieval
 - Some Formstack features may require specific account permissions
 - Date parsing assumes specific Formstack date formats
-- Portal API functionality may vary based on account type
 
 ## 🔮 Future Enhancements
 
