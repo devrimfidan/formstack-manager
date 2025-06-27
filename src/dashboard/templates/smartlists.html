@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartLists - Formstack Dashboard</title>
+    <!-- Tailwind CSS for overall styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 4rem;
+        }
+
+        .sidebar-brand {
+            background: #2c8150;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-brand:hover {
+            background: #237747;
+        }
+
+        .sidebar-nav {
+            background: #1f2937;
+        }
+
+        .sidebar-nav-item {
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            color: #d1d5db;
+            background: #374151;
+        }
+
+        .sidebar-nav-item.active {
+            color: #36b66c;
+            background: #ffffff;
+        }
+
+        /* Action buttons */
+        .action-button {
+            background: #36b66c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .action-button:hover {
+            background: #237747;
+        }
+
+        /* SmartList card styling */
+        .smartlist-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .smartlist-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .smartlist-header {
+            background: linear-gradient(135deg, #36b66c 0%, #4bca81 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .smartlist-body {
+            padding: 1.5rem;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="sidebar hidden md:flex md:flex-shrink-0 h-full">
+            <div class="flex flex-col w-16 h-full">
+                <!-- Brand Section -->
+                <div class="sidebar-brand flex items-center justify-center h-16">
+                    <img src="https://images.icon-icons.com/2699/PNG/512/formstack_logo_icon_169154.png" alt="Formstack" class="h-8 w-8">
+                </div>
+                
+                <!-- Navigation -->
+                <div class="sidebar-nav flex-1 flex flex-col">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="/" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Dashboard">
+                            <i class="fa fa-dashboard"></i>
+                        </a>
+                        <a href="/folders" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Folders">
+                            <i class="fa fa-folder"></i>
+                        </a>
+                        <a href="/form-details" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Details">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                        <a href="/advanced-search" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Advanced Search">
+                            <i class="fa fa-search-plus"></i>
+                        </a>
+                        <a href="/audit" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Audit">
+                            <i class="fa fa-shield"></i>
+                        </a>
+                        <a href="/smartlists" class="sidebar-nav-item active flex items-center justify-center py-3 text-lg rounded-md" title="SmartLists">
+                            <i class="fa fa-list-alt"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col w-0 flex-1 h-full overflow-hidden">
+            <!-- Top Header -->
+            <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 md:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="flex-1 px-4 flex justify-between">
+                    <div class="flex-1 flex items-center">
+                        <h1 class="text-2xl font-semibold text-gray-900">
+                            <i class="fa fa-list-alt mr-3 text-green-600"></i>
+                            SmartLists
+                        </h1>
+                    </div>
+                    <div class="ml-4 flex items-center md:ml-6 space-x-3">
+                        <!-- Refresh Button -->
+                        <button id="refresh-button" class="action-button" onclick="window.location.reload()">
+                            <i class="fa fa-refresh mr-2"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                        {% if error %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mb-6 shadow-md" role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline ml-2">{{ error }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if smartlists %}
+                        <!-- SmartLists Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {% for smartlist in smartlists %}
+                            <div class="smartlist-card">
+                                <div class="smartlist-header">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-lg font-semibold truncate">{{ smartlist.name }}</h3>
+                                        <div class="stat-badge {{ 'status-active' if smartlist.is_active else 'status-inactive' }}">
+                                            {{ 'Active' if smartlist.is_active else 'Inactive' }}
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-green-100 mt-1">ID: {{ smartlist.id }}</p>
+                                </div>
+                                <div class="smartlist-body">
+                                    {% if smartlist.description %}
+                                    <p class="text-gray-600 text-sm mb-4">{{ smartlist.description }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-500">Items Count:</span>
+                                            <span class="font-medium">{{ smartlist.items_count | default(0) }}</span>
+                                        </div>
+                                        
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-500">Fields:</span>
+                                            <span class="font-medium">{{ smartlist.fields | length if smartlist.fields else 0 }}</span>
+                                        </div>
+                                        
+                                        {% if smartlist.folder %}
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-500">Folder:</span>
+                                            <span class="font-medium text-blue-600">{{ smartlist.folder }}</span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if smartlist.created %}
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-500">Created:</span>
+                                            <span class="font-medium">{{ smartlist.created }}</span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if smartlist.updated %}
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-500">Updated:</span>
+                                            <span class="font-medium">{{ smartlist.updated }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mt-6 flex space-x-3">
+                                        <a href="/smartlist-details/{{ smartlist.id }}" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-4 rounded-md text-sm font-medium transition-colors">
+                                            <i class="fa fa-info-circle mr-1"></i>
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Summary Stats -->
+                        <div class="mt-8 bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fa fa-bar-chart mr-2 text-green-600"></i>
+                                SmartLists Summary
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600">{{ smartlists | length }}</div>
+                                    <div class="text-sm text-gray-500">Total SmartLists</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600">{{ smartlists | selectattr('is_active') | list | length }}</div>
+                                    <div class="text-sm text-gray-500">Active</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-orange-600">{{ smartlists | rejectattr('is_active') | list | length }}</div>
+                                    <div class="text-sm text-gray-500">Inactive</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-purple-600">{{ smartlists | sum(attribute='items_count') }}</div>
+                                    <div class="text-sm text-gray-500">Total Items</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% else %}
+                        {% if not error %}
+                        <div class="text-center py-12">
+                            <i class="fa fa-list-alt text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">No SmartLists found or retrieved. Please check your API key and network connection.</p>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

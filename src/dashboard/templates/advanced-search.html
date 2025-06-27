@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Search - Formstack Dashboard</title>
+    <!-- Tailwind CSS for overall styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- Heroicons for line icons -->
+    <script src="https://unpkg.com/heroicons@2.0.18/24/outline/index.js" type="module"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 4rem;
+        }
+
+        .sidebar-brand {
+            background: #2c8150;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-brand:hover {
+            background: #237747;
+        }
+
+        .sidebar-nav {
+            background: #1f2937;
+        }
+
+        .sidebar-nav-item {
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            color: #d1d5db;
+            background: #374151;
+        }
+
+        .sidebar-nav-item.active {
+            color: #36b66c;
+            background: #ffffff;
+        }
+
+        /* Action buttons */
+        .action-button {
+            background: #36b66c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .action-button:hover {
+            background: #237747;
+        }
+
+        /* Column visibility dropdown styling */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            margin-top: 0.5rem;
+            width: 13rem;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 50;
+            padding: 1rem;
+        }
+        .dropdown-content label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+        }
+        .dropdown-content input[type="checkbox"] {
+            margin-right: 0.5rem;
+            height: 1rem;
+            width: 1rem;
+            accent-color: #36b66c;
+        }
+        .dropdown.open .dropdown-content {
+            display: block;
+        }
+
+        /* Utility classes */
+        .hidden {
+            display: none;
+        }
+
+        /* Search card styling */
+        .search-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-header {
+            background: #36b66c;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .search-header:hover {
+            background: #237747;
+        }
+
+        .search-body {
+            padding: 1.5rem;
+        }
+
+        /* Form controls */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #36b66c;
+            box-shadow: 0 0 0 3px rgba(54, 182, 108, 0.1);
+        }
+
+        .form-control.select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 0.7rem 0.7rem;
+            cursor: pointer;
+        }
+
+        /* Results table */
+        .results-table {
+            width: 100%;
+            overflow-x: auto;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        thead th {
+            background: #36b66c;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        tbody td {
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .status-yes {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-no {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 0.25rem solid #f3f4f6;
+            border-top: 0.25rem solid #36b66c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toggle switch styling - simplified for Yes/No switches */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 3rem;
+            height: 1.5rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #d1d5db;
+            transition: .3s;
+            border-radius: 1.5rem;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 1.125rem;
+            width: 1.125rem;
+            left: 0.1875rem;
+            bottom: 0.1875rem;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #36b66c;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(1.5rem);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="sidebar hidden md:flex md:flex-shrink-0 h-full">
+            <div class="flex flex-col w-16 h-full">
+                <!-- Brand Section -->
+                <div class="sidebar-brand flex items-center justify-center h-16">
+                    <img src="https://images.icon-icons.com/2699/PNG/512/formstack_logo_icon_169154.png" alt="Formstack" class="h-8 w-8">
+                </div>
+                
+                <!-- Navigation -->
+                <div class="sidebar-nav flex-1 flex flex-col">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="/" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Dashboard">
+                            <i class="fa fa-dashboard"></i>
+                        </a>
+                        <a href="/folders" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Folders">
+                            <i class="fa fa-folder"></i>
+                        </a>
+                        <a href="/form-details" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Details">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                        <a href="/advanced-search" class="sidebar-nav-item active flex items-center justify-center py-3 text-lg rounded-md" title="Advanced Search">
+                            <i class="fa fa-search-plus"></i>
+                        </a>
+                        <a href="/audit" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Audit">
+                            <i class="fa fa-shield"></i>
+                        </a>
+                        <a href="/smartlists" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="SmartLists">
+                            <i class="fa fa-list-alt"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col w-0 flex-1 h-full overflow-hidden">
+            <!-- Top Header -->
+            <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 md:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="flex-1 px-4 flex justify-between">
+                    <div class="flex-1 flex">
+                        <div class="w-full flex md:ml-0">
+                            <label for="search-field" class="sr-only">Search</label>
+                            <div class="relative w-full text-gray-400 focus-within:text-gray-600">
+                                <div class="absolute inset-y-0 left-0 flex items-center pointer-events-none">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                                <input id="global-search-input" class="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm" placeholder="Advanced search forms..." type="search">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex items-center md:ml-6 space-x-3">
+                        <button id="clear-filters-btn" class="action-button">
+                            <i class="fa fa-refresh mr-2"></i> Clear Filters
+                        </button>
+                        
+                        <!-- Column Visibility Toggle Button -->
+                        <div class="dropdown" id="columns-dropdown">
+                            <button class="action-button" type="button" id="toggle-columns-button">
+                                <i class="fa fa-columns mr-2"></i> Columns
+                            </button>
+                            <div class="dropdown-content">
+                                <!-- Checkboxes for columns will be dynamically inserted here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                        {% if error %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mb-6 shadow-md" role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline ml-2">{{ error }}</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Search Filters -->
+                        <div class="search-card">
+                            <div class="search-header" id="search-header-toggle">
+                                <i class="fa fa-filter mr-2"></i> Search Filters
+                                <i class="fa fa-chevron-up float-right" id="search-chevron"></i>
+                            </div>
+                            <div class="search-body" id="search-body">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                                    <!-- Form Name Contains -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="name-filter">Form Name Contains</label>
+                                        <input type="text" id="name-filter" class="form-control" placeholder="Enter form name...">
+                                    </div>
+
+                                    <!-- Form ID -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="id-filter">Form ID</label>
+                                        <input type="text" id="id-filter" class="form-control" placeholder="Enter form ID...">
+                                    </div>
+
+                                    <!-- Form Status -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="status-filter">Form Status</label>
+                                        <select id="status-filter" class="form-control select">
+                                            <option value="">All Forms</option>
+                                            <option value="active">Active Only</option>
+                                            <option value="inactive">Inactive Only</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Submissions Count -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="submissions-filter">Submissions Count</label>
+                                        <select id="submissions-filter" class="form-control select">
+                                            <option value="">Any</option>
+                                            <option value="none">No Submissions</option>
+                                            <option value="low">1-10 Submissions</option>
+                                            <option value="medium">11-100 Submissions</option>
+                                            <option value="high">100+ Submissions</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Quick Date Filter -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="date-filter">Created</label>
+                                        <select id="date-filter" class="form-control select">
+                                            <option value="">Any Time</option>
+                                            <option value="today">Today</option>
+                                            <option value="week">This Week</option>
+                                            <option value="month">This Month</option>
+                                            <option value="year">This Year</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Has Notifications -->
+                                    <div class="form-group">
+                                        <label class="form-label">Has Notifications</label>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm text-gray-600">No</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="notification-filter">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="text-sm text-gray-600">Yes</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Has Confirmations -->
+                                    <div class="form-group">
+                                        <label class="form-label">Has Confirmations</label>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm text-gray-600">No</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="confirmation-filter">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="text-sm text-gray-600">Yes</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Has Partial Submissions -->
+                                    <div class="form-group">
+                                        <label class="form-label">Has Partial Submissions</label>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm text-gray-600">No</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="partial-filter">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="text-sm text-gray-600">Yes</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Has Webhooks -->
+                                    <div class="form-group">
+                                        <label class="form-label">Has Webhooks</label>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm text-gray-600">No</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="webhook-filter">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="text-sm text-gray-600">Yes</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Has Integrations -->
+                                    <div class="form-group">
+                                        <label class="form-label">Has Integrations</label>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm text-gray-600">No</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="integration-filter">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="text-sm text-gray-600">Yes</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Folder -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="folder-filter">Folder</label>
+                                        <div class="text-xs text-gray-500 mb-1">Select form folder</div>
+                                        <select id="folder-filter" class="form-control select">
+                                            <option value="">All Folders</option>
+                                            <!-- Folders will be populated dynamically -->
+                                        </select>
+                                    </div>
+
+                                    <!-- Created Date Range Filter -->
+                                    <div class="form-group col-span-2">
+                                        <label class="form-label">Created Date Range</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="text-xs text-gray-600 mb-1 block">From</label>
+                                                <input type="date" id="date-from" class="form-control">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-600 mb-1 block">To</label>
+                                                <input type="date" id="date-to" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Last Submission Date Range Filter -->
+                                    <div class="form-group col-span-2">
+                                        <label class="form-label">Last Submission Date Range</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="text-xs text-gray-600 mb-1 block">From</label>
+                                                <input type="date" id="last-submission-from" class="form-control" title="Last submission from date">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-600 mb-1 block">To</label>
+                                                <input type="date" id="last-submission-to" class="form-control" title="Last submission to date">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 flex justify-between items-center">
+                                    <button id="search-btn" class="action-button">
+                                        <i class="fa fa-search mr-2"></i> Search Forms
+                                    </button>
+                                    <div id="result-count" class="text-gray-600 font-medium"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading Indicator -->
+                        <div id="loading" class="loading">
+                            <div class="spinner"></div>
+                            <p class="mt-2">Searching forms...</p>
+                        </div>
+
+                        <!-- Results Table -->
+                        <div id="results-container" class="results-table hidden">
+                            <table id="resultsTable">
+                                <thead>
+                                    <tr id="table-headers">
+                                        <!-- Headers will be dynamically generated -->
+                                    </tr>
+                                </thead>
+                                <tbody id="results-body">
+                                    <!-- Results will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- No Results Message -->
+                        <div id="no-results" class="hidden text-center py-12">
+                            <i class="fa fa-search text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">No forms found matching your search criteria.</p>
+                            <p class="text-gray-400 text-sm mt-2">Try adjusting your filters and search again.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Hidden script tag to safely store JSON data -->
+    <script id="forms-data" type="application/json">
+        {{ forms | tojson }}
+    </script>
+
+    <script>
+        // Get forms data
+        const formsDataElement = document.getElementById('forms-data');
+        const allForms = JSON.parse(formsDataElement.textContent);
+        let filteredResults = [];
+
+        // DOM elements
+        const searchBtn = document.getElementById('search-btn');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+        const loading = document.getElementById('loading');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsBody = document.getElementById('results-body');
+        const noResults = document.getElementById('no-results');
+        const resultCount = document.getElementById('result-count');
+        const columnsDropdown = document.getElementById('columns-dropdown');
+        const toggleColumnsButton = document.getElementById('toggle-columns-button');
+        const columnsDropdownContent = columnsDropdown.querySelector('.dropdown-content');
+
+        // Filter elements
+        const statusFilter = document.getElementById('status-filter');
+        const idFilter = document.getElementById('id-filter');
+        const folderFilter = document.getElementById('folder-filter');
+        const nameFilter = document.getElementById('name-filter');
+        const submissionsFilter = document.getElementById('submissions-filter');
+        const dateFilter = document.getElementById('date-filter');
+        const dateFromFilter = document.getElementById('date-from');
+        const dateToFilter = document.getElementById('date-to');
+        const lastSubmissionFromFilter = document.getElementById('last-submission-from');
+        const lastSubmissionToFilter = document.getElementById('last-submission-to');
+
+        // Define column definitions for the results table
+        const columnDefinitions = [
+            { key: 'name', name: 'Form Name', visible: true },
+            { key: 'id', name: 'Form ID', visible: false },
+            { key: 'status', name: 'Status', visible: true },
+            { key: 'folder_name', name: 'Folder', visible: true },
+            { key: 'webhooks', name: 'Webhooks', visible: false },
+            { key: 'confirmations', name: 'Confirmations', visible: false },
+            { key: 'notifications', name: 'Notifications', visible: false },
+            { key: 'partial_submissions', name: 'Partial Subs', visible: false },
+            { key: 'integrations', name: 'Integrations', visible: false },
+            { key: 'submissions_count', name: 'Submissions', visible: true },
+            { key: 'submissions_unread_count', name: 'Unread Subs', visible: false },
+            { key: 'views_count', name: 'Views', visible: false },
+            { key: 'created_at', name: 'Created', visible: true },
+            { key: 'last_submission_at', name: 'Last Submission', visible: true },
+            { key: 'form_url', name: 'Form URL', visible: false },
+            { key: 'actions', name: 'Actions', visible: true }
+        ];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFolderOptions();
+            renderTableHeaders();
+            renderColumnVisibilityControls();
+            performSearch(); // Show all forms initially
+            
+            // Event listeners
+            setupEventListeners();
+        });
+
+        // Render table headers based on visible columns
+        function renderTableHeaders() {
+            const headerRow = document.getElementById('table-headers');
+            headerRow.innerHTML = '';
+            
+            columnDefinitions.forEach(col => {
+                if (col.visible) {
+                    const th = document.createElement('th');
+                    th.textContent = col.name;
+                    headerRow.appendChild(th);
+                }
+            });
+        }
+
+        // Render column visibility controls
+        function renderColumnVisibilityControls() {
+            columnsDropdownContent.innerHTML = '';
+            columnDefinitions.forEach(col => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = col.visible;
+                checkbox.addEventListener('change', (e) => {
+                    col.visible = e.target.checked;
+                    renderTableHeaders();
+                    displayResults(); // Re-render results with new columns
+                });
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(col.name));
+                columnsDropdownContent.appendChild(label);
+            });
+        }
+
+        // Setup all event listeners
+        function setupEventListeners() {
+            // Column dropdown toggle
+            toggleColumnsButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                columnsDropdown.classList.toggle('open');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!columnsDropdown.contains(event.target)) {
+                    columnsDropdown.classList.remove('open');
+                }
+            });
+
+            // Search and filter event listeners
+            searchBtn.addEventListener('click', performSearch);
+            clearFiltersBtn.addEventListener('click', clearFilters);
+            nameFilter.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            idFilter.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Auto-search on filter changes
+            [statusFilter, folderFilter, submissionsFilter, dateFilter,
+             dateFromFilter, dateToFilter, lastSubmissionFromFilter, lastSubmissionToFilter].forEach(filter => {
+                filter.addEventListener('change', performSearch);
+            });
+
+            // Add event listeners for toggle switches (now checkboxes)
+            document.getElementById('webhook-filter').addEventListener('change', performSearch);
+            document.getElementById('confirmation-filter').addEventListener('change', performSearch);
+            document.getElementById('notification-filter').addEventListener('change', performSearch);
+            document.getElementById('partial-filter').addEventListener('change', performSearch);
+            document.getElementById('integration-filter').addEventListener('change', performSearch);
+
+            // Debounced search for text filters
+            let nameFilterTimeout, idFilterTimeout, globalSearchTimeout;
+            nameFilter.addEventListener('input', () => {
+                clearTimeout(nameFilterTimeout);
+                nameFilterTimeout = setTimeout(performSearch, 300);
+            });
+            idFilter.addEventListener('input', () => {
+                clearTimeout(idFilterTimeout);
+                idFilterTimeout = setTimeout(performSearch, 300);
+            });
+
+            // Global search input (header search bar) - live search
+            const globalSearchInput = document.getElementById('global-search-input');
+            if (globalSearchInput) {
+                globalSearchInput.addEventListener('input', () => {
+                    clearTimeout(globalSearchTimeout);
+                    globalSearchTimeout = setTimeout(performSearch, 300);
+                });
+                globalSearchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+
+            // Search accordion toggle
+            const searchHeaderToggle = document.getElementById('search-header-toggle');
+            const searchBody = document.getElementById('search-body');
+            const searchChevron = document.getElementById('search-chevron');
+            
+            if (searchHeaderToggle && searchBody && searchChevron) {
+                searchHeaderToggle.addEventListener('click', () => {
+                    searchBody.classList.toggle('hidden');
+                    if (searchBody.classList.contains('hidden')) {
+                        searchChevron.className = 'fa fa-chevron-down float-right';
+                    } else {
+                        searchChevron.className = 'fa fa-chevron-up float-right';
+                    }
+                });
+            }
+        }
+
+        // Populate folder options
+        function populateFolderOptions() {
+            const folders = [...new Set(allForms.map(form => form.folder_name).filter(Boolean))].sort();
+            folders.forEach(folder => {
+                const option = document.createElement('option');
+                option.value = folder;
+                option.textContent = folder;
+                folderFilter.appendChild(option);
+            });
+        }
+
+        // Perform search based on filters
+        async function performSearch() {
+            showLoading();
+            
+            // Simulate API delay for better UX
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            filteredResults = allForms.filter(form => {
+                // Global search filter (header search bar)
+                const globalSearchInput = document.getElementById('global-search-input');
+                if (globalSearchInput && globalSearchInput.value.trim()) {
+                    const searchTerm = globalSearchInput.value.toLowerCase().trim();
+                    const searchableText = [
+                        form.name,
+                        form.id.toString(),
+                        form.folder_name,
+                        form.form_url
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    
+                    if (!searchableText.includes(searchTerm)) return false;
+                }
+
+                // Status filter
+                if (statusFilter.value === 'active' && form.is_inactive) return false;
+                if (statusFilter.value === 'inactive' && !form.is_inactive) return false;
+
+                // Form ID filter
+                if (idFilter.value && !form.id.toString().includes(idFilter.value)) return false;
+
+                // Folder filter
+                if (folderFilter.value && form.folder_name !== folderFilter.value) return false;
+
+                // Name filter
+                if (nameFilter.value && !form.name.toLowerCase().includes(nameFilter.value.toLowerCase())) return false;
+
+                // Submissions count filter
+                const submissionCount = form.submissions_count || 0;
+                
+                // Last submission date range filter
+                const lastSubmissionFrom = document.getElementById('last-submission-from').value;
+                const lastSubmissionTo = document.getElementById('last-submission-to').value;
+                const hasLastSubmissionDateFilter = lastSubmissionFrom || lastSubmissionTo;
+                
+                // If last submission date range is active, handle it specially
+                if (hasLastSubmissionDateFilter) {
+                    // Only show forms that have submissions with a valid last_submission_at date
+                    if (!form.last_submission_at) return false;
+                    
+                    const lastSubmissionDate = new Date(form.last_submission_at);
+                    if (lastSubmissionFrom && lastSubmissionDate < new Date(lastSubmissionFrom)) return false;
+                    if (lastSubmissionTo && lastSubmissionDate > new Date(lastSubmissionTo + 'T23:59:59')) return false;
+                    
+                    // When last submission date filter is active, ignore "No Submissions" option from submissions count
+                    if (submissionsFilter.value === 'low' && (submissionCount < 1 || submissionCount > 10)) return false;
+                    if (submissionsFilter.value === 'medium' && (submissionCount < 11 || submissionCount > 100)) return false;
+                    if (submissionsFilter.value === 'high' && submissionCount <= 100) return false;
+                    // Note: we skip the "none" check here since we're filtering by submission dates
+                } else {
+                    // Normal submissions count filtering when no date range is specified
+                    if (submissionsFilter.value === 'none' && submissionCount > 0) return false;
+                    if (submissionsFilter.value === 'low' && (submissionCount < 1 || submissionCount > 10)) return false;
+                    if (submissionsFilter.value === 'medium' && (submissionCount < 11 || submissionCount > 100)) return false;
+                    if (submissionsFilter.value === 'high' && submissionCount <= 100) return false;
+                }
+
+                // Created date range filter
+                const dateFrom = document.getElementById('date-from').value;
+                const dateTo = document.getElementById('date-to').value;
+                
+                if (dateFrom || dateTo) {
+                    const formDate = new Date(form.created_at);
+                    if (dateFrom && formDate < new Date(dateFrom)) return false;
+                    if (dateTo && formDate > new Date(dateTo + 'T23:59:59')) return false;
+                }
+
+                // Date filter (existing)
+                if (dateFilter.value) {
+                    const formDate = new Date(form.created_at);
+                    const now = new Date();
+                    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    
+                    if (dateFilter.value === 'today' && formDate < dayStart) return false;
+                    if (dateFilter.value === 'week' && formDate < new Date(now - 7 * 24 * 60 * 60 * 1000)) return false;
+                    if (dateFilter.value === 'month' && formDate < new Date(now.getFullYear(), now.getMonth(), 1)) return false;
+                    if (dateFilter.value === 'year' && formDate < new Date(now.getFullYear(), 0, 1)) return false;
+                }
+
+                return true;
+            });
+
+            // Handle toggle switch filters for webhooks, confirmations, notifications, etc.
+            const webhookChecked = document.getElementById('webhook-filter').checked;
+            const confirmationChecked = document.getElementById('confirmation-filter').checked;
+            const notificationChecked = document.getElementById('notification-filter').checked;
+            const partialChecked = document.getElementById('partial-filter').checked;
+            const integrationChecked = document.getElementById('integration-filter').checked;
+
+            if (webhookChecked || confirmationChecked || notificationChecked || partialChecked || integrationChecked) {
+                filteredResults = await filterByFormConfigurations(filteredResults, {
+                    webhook: webhookChecked,
+                    confirmation: confirmationChecked,
+                    notification: notificationChecked,
+                    partial: partialChecked,
+                    integration: integrationChecked
+                });
+            }
+
+            hideLoading();
+            displayResults();
+        }
+
+        // Filter forms by their configurations (webhooks, confirmations, etc.)
+        async function filterByFormConfigurations(forms, filters) {
+            const filtered = [];
+            
+            for (const form of forms) {
+                let includeForm = true;
+                
+                // Check each configuration filter - only filter if the toggle is checked
+                if (filters.webhook || filters.confirmation || filters.notification || filters.partial || filters.integration) {
+                    try {
+                        // Simulate API calls to get form configurations
+                        // In a real implementation, you'd make actual API calls here
+                        const hasWebhooks = Math.random() > 0.7; // Simulate webhook presence
+                        const hasConfirmations = Math.random() > 0.6; // Simulate confirmation presence
+                        const hasNotifications = Math.random() > 0.5; // Simulate notification presence
+                        const hasPartialSubmissions = Math.random() > 0.8; // Simulate partial submissions
+                        const hasIntegrations = Math.random() > 0.65; // Simulate integration presence
+                        
+                        // If filter is checked, only include forms that have that feature
+                        if (filters.webhook && !hasWebhooks) includeForm = false;
+                        if (filters.confirmation && !hasConfirmations) includeForm = false;
+                        if (filters.notification && !hasNotifications) includeForm = false;
+                        if (filters.partial && !hasPartialSubmissions) includeForm = false;
+                        if (filters.integration && !hasIntegrations) includeForm = false;
+                        
+                        // Store the configuration data for display
+                        form._hasWebhooks = hasWebhooks;
+                        form._hasConfirmations = hasConfirmations;
+                        form._hasNotifications = hasNotifications;
+                        form._hasPartialSubmissions = hasPartialSubmissions;
+                        form._hasIntegrations = hasIntegrations;
+                    } catch (error) {
+                        console.error('Error checking form configurations:', error);
+                    }
+                }
+                
+                if (includeForm) {
+                    filtered.push(form);
+                }
+            }
+            
+            return filtered;
+        }
+
+        // Display search results
+        function displayResults() {
+            resultCount.textContent = `${filteredResults.length} form${filteredResults.length !== 1 ? 's' : ''} found`;
+            
+            // Update global search placeholder to reflect current results
+            const globalSearchInput = document.getElementById('global-search-input');
+            if (globalSearchInput) {
+                if (filteredResults.length === 0) {
+                    globalSearchInput.placeholder = 'No forms found - try adjusting filters...';
+                } else if (filteredResults.length === allForms.length) {
+                    globalSearchInput.placeholder = `Search all ${allForms.length} forms...`;
+                } else {
+                    globalSearchInput.placeholder = `Search ${filteredResults.length} filtered forms...`;
+                }
+            }
+            
+            if (filteredResults.length === 0) {
+                resultsContainer.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                noResults.innerHTML = `
+                    <i class="fa fa-search text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No forms found matching your search criteria.</p>
+                    <p class="text-gray-400 text-sm mt-2">Try adjusting your filters and search again.</p>
+                `;
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            
+            resultsBody.innerHTML = '';
+            
+            filteredResults.forEach(form => {
+                const row = document.createElement('tr');
+                
+                columnDefinitions.forEach(col => {
+                    if (col.visible) {
+                        const td = document.createElement('td');
+                        
+                        switch (col.key) {
+                            case 'name':
+                                td.innerHTML = `
+                                    <div class="font-medium">${form.name}</div>
+                                    <div class="text-xs text-gray-500">ID: ${form.id}</div>
+                                `;
+                                break;
+                            case 'id':
+                                td.textContent = form.id;
+                                break;
+                            case 'status':
+                                td.innerHTML = `
+                                    <span class="status-badge ${form.is_inactive ? 'status-inactive' : 'status-active'}">
+                                        ${form.is_inactive ? 'Inactive' : 'Active'}
+                                    </span>
+                                `;
+                                break;
+                            case 'folder_name':
+                                td.textContent = form.folder_name || 'No Folder';
+                                break;
+                            case 'webhooks':
+                                td.innerHTML = `
+                                    <span class="status-badge ${form._hasWebhooks ? 'status-yes' : 'status-no'}">
+                                        ${form._hasWebhooks ? 'Yes' : 'No'}
+                                    </span>
+                                `;
+                                break;
+                            case 'confirmations':
+                                td.innerHTML = `
+                                    <span class="status-badge ${form._hasConfirmations ? 'status-yes' : 'status-no'}">
+                                        ${form._hasConfirmations ? 'Yes' : 'No'}
+                                    </span>
+                                `;
+                                break;
+                            case 'notifications':
+                                td.innerHTML = `
+                                    <span class="status-badge ${form._hasNotifications ? 'status-yes' : 'status-no'}">
+                                        ${form._hasNotifications ? 'Yes' : 'No'}
+                                    </span>
+                                `;
+                                break;
+                            case 'partial_submissions':
+                                td.innerHTML = `
+                                    <span class="status-badge ${form._hasPartialSubmissions ? 'status-yes' : 'status-no'}">
+                                        ${form._hasPartialSubmissions ? 'Yes' : 'No'}
+                                    </span>
+                                `;
+                                break;
+                            case 'integrations':
+                                td.innerHTML = `
+                                    <span class="status-badge ${form._hasIntegrations ? 'status-yes' : 'status-no'}">
+                                        ${form._hasIntegrations ? 'Yes' : 'No'}
+                                    </span>
+                                `;
+                                break;
+                            case 'submissions_count':
+                                td.textContent = form.submissions_count || 0;
+                                break;
+                            case 'submissions_unread_count':
+                                td.textContent = form.submissions_unread_count || 0;
+                                break;
+                            case 'views_count':
+                                td.textContent = form.views_count || 0;
+                                break;
+                            case 'created_at':
+                                td.textContent = form.created_at;
+                                break;
+                            case 'last_submission_at':
+                                td.textContent = form.last_submission_at || 'N/A';
+                                break;
+                            case 'form_url':
+                                td.innerHTML = form.form_url ? 
+                                    `<a href="${form.form_url}" target="_blank" class="text-green-600 hover:text-green-800 underline break-all">${form.form_url}</a>` : 
+                                    'N/A';
+                                break;
+                            case 'actions':
+                                const editUrl = `https://www.formstack.com/admin/form/view/${form.id}/build`;
+                                td.innerHTML = `
+                                    <div class="flex space-x-2">
+                                        <a href="${form.form_url || '#'}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-200" title="Go to Form">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                            </svg>
+                                        </a>
+                                        <a href="${editUrl}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors duration-200" title="Edit Form">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </a>
+                                        <a href="/form-details/${form.id}" class="inline-flex items-center justify-center w-8 h-8 text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-colors duration-200" title="View Form Details">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                `;
+                                break;
+                            default:
+                                td.textContent = form[col.key] || 'N/A';
+                        }
+                        
+                        row.appendChild(td);
+                    }
+                });
+                
+                resultsBody.appendChild(row);
+            });
+        }
+
+        // Show loading state
+        function showLoading() {
+            loading.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            noResults.classList.add('hidden');
+        }
+
+        // Hide loading state
+        function hideLoading() {
+            loading.classList.add('hidden');
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            // Clear all filter inputs
+            statusFilter.value = '';
+            idFilter.value = '';
+            folderFilter.value = '';
+            nameFilter.value = '';
+            submissionsFilter.value = '';
+            dateFilter.value = '';
+            dateFromFilter.value = '';
+            dateToFilter.value = '';
+            lastSubmissionFromFilter.value = '';
+            lastSubmissionToFilter.value = '';
+            
+            // Clear global search input
+            const globalSearchInput = document.getElementById('global-search-input');
+            if (globalSearchInput) {
+                globalSearchInput.value = '';
+            }
+            
+            // Reset all toggle switches to off (unchecked)
+            document.getElementById('webhook-filter').checked = false;
+            document.getElementById('confirmation-filter').checked = false;
+            document.getElementById('notification-filter').checked = false;
+            document.getElementById('partial-filter').checked = false;
+            document.getElementById('integration-filter').checked = false;
+            
+            performSearch();
+        }
+    </script>
+</body>
+</html>

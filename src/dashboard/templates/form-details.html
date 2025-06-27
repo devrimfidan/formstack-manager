@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Details - Formstack Dashboard</title>
+    <!-- Tailwind CSS for overall styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 4rem;
+        }
+
+        .sidebar-brand {
+            background: #2c8150;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-brand:hover {
+            background: #237747;
+        }
+
+        .sidebar-nav {
+            background: #1f2937;
+        }
+
+        .sidebar-nav-item {
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            color: #d1d5db;
+            background: #374151;
+        }
+
+        .sidebar-nav-item.active {
+            color: #36b66c;
+            background: #ffffff;
+        }
+
+        /* Stats cards styling */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border-radius: 0.5rem;
+        }
+
+        .stat-icon {
+            display: inline-flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            height: 4rem;
+            width: 4rem;
+            border-radius: 50%;
+            margin-right: 1.5rem;
+        }
+
+        .stat-icon.green {
+            color: #36b66c;
+            background-color: #dcfce7;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Action buttons styling */
+        .action-button {
+            background: #36b66c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .action-button:hover {
+            background: #237747;
+        }
+
+        /* Form details card styling */
+        .details-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+        }
+
+        .details-header {
+            background: #36b66c;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .details-body {
+            padding: 1.5rem;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .detail-value {
+            color: #6b7280;
+            word-wrap: break-word;
+        }
+
+        .detail-value a {
+            color: #36b66c;
+            text-decoration: underline;
+        }
+
+        .detail-value a:hover {
+            color: #237747;
+        }
+
+        /* Form ID input styling */
+        .form-id-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-id-input:focus {
+            outline: none;
+            border-color: #36b66c;
+            box-shadow: 0 0 0 3px rgba(54, 182, 108, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="sidebar hidden md:flex md:flex-shrink-0 h-full">
+            <div class="flex flex-col w-16 h-full">
+                <!-- Brand Section -->
+                <div class="sidebar-brand flex items-center justify-center h-16">
+                    <img src="https://images.icon-icons.com/2699/PNG/512/formstack_logo_icon_169154.png" alt="Formstack" class="h-8 w-8">
+                </div>
+                
+                <!-- Navigation -->
+                <div class="sidebar-nav flex-1 flex flex-col">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="/" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Dashboard">
+                            <i class="fa fa-dashboard"></i>
+                        </a>
+                        <a href="/folders" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Folders">
+                            <i class="fa fa-folder"></i>
+                        </a>
+                        <a href="/form-details" class="sidebar-nav-item active flex items-center justify-center py-3 text-lg rounded-md" title="Form Details">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                        <a href="/advanced-search" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Advanced Search">
+                            <i class="fa fa-search-plus"></i>
+                        </a>
+                        <a href="/audit" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Audit">
+                            <i class="fa fa-shield"></i>
+                        </a>
+                        <a href="/smartlists" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="SmartLists">
+                            <i class="fa fa-list-alt"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col w-0 flex-1 h-full overflow-hidden">
+            <!-- Top Header -->
+            <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 md:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="flex-1 px-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-semibold text-gray-900">Form Details</h1>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        {% if form_data %}
+                        <a href="{{ form_data.edit_url }}" target="_blank" class="action-button">
+                            <i class="fa fa-edit mr-2"></i> Edit Form
+                        </a>
+                        <a href="{{ form_data.url }}" target="_blank" class="action-button">
+                            <i class="fa fa-external-link mr-2"></i> View Form
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                        {% if error %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mb-6 shadow-md" role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline ml-2">{{ error }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if not form_data and not form_id %}
+                        <!-- Form ID Input Section -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-search mr-2"></i> Enter Form ID
+                            </div>
+                            <div class="details-body text-center">
+                                <p class="text-gray-600 mb-6">Enter a form ID to view detailed information about that form.</p>
+                                <div class="flex flex-col items-center space-y-4">
+                                    <input type="text" id="form-id-input" class="form-id-input" placeholder="Enter Form ID (e.g., 1234567)">
+                                    <button id="view-form-btn" class="action-button">
+                                        <i class="fa fa-search mr-2"></i> View Form Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if form_data %}
+                        <!-- Form Overview Stats -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-eye fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number">{{ form_data.views or 0 }}</div>
+                                    <div class="stat-label">Total Views</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-file-text-o fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number">{{ form_data.submissions or 0 }}</div>
+                                    <div class="stat-label">Total Submissions</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-envelope fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number">{{ form_data.submissions_unread or 0 }}</div>
+                                    <div class="stat-label">Unread Submissions</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-calendar fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number">{{ form_data.submissions_today or 0 }}</div>
+                                    <div class="stat-label">Submissions Today</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-info-circle mr-2"></i> Basic Information
+                            </div>
+                            <div class="details-body">
+                                <div class="detail-row">
+                                    <div class="detail-label">Form ID</div>
+                                    <div class="detail-value">{{ form_data.id }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Form Name</div>
+                                    <div class="detail-value">{{ form_data.name }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Status</div>
+                                    <div class="detail-value">
+                                        {% if form_data.inactive %}
+                                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">Inactive</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Active</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Form URL</div>
+                                    <div class="detail-value">
+                                        <a href="{{ form_data.url }}" target="_blank">{{ form_data.url }}</a>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Edit URL</div>
+                                    <div class="detail-value">
+                                        <a href="{{ form_data.edit_url }}" target="_blank">{{ form_data.edit_url }}</a>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Created</div>
+                                    <div class="detail-value">{{ form_data.created }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Last Updated</div>
+                                    <div class="detail-value">{{ form_data.updated }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Last Submission</div>
+                                    <div class="detail-value">{{ form_data.last_submission_time or 'No submissions yet' }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Configuration -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-cogs mr-2"></i> Configuration
+                            </div>
+                            <div class="details-body">
+                                <div class="detail-row">
+                                    <div class="detail-label">Language</div>
+                                    <div class="detail-value">{{ form_data.language or 'Not specified' }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Timezone</div>
+                                    <div class="detail-value">{{ form_data.timezone or 'Not specified' }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Number of Columns</div>
+                                    <div class="detail-value">{{ form_data.num_columns or 'Not specified' }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Progress Meter</div>
+                                    <div class="detail-value">
+                                        {% if form_data.progress_meter %}
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Enabled</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">Disabled</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Submit Button Title</div>
+                                    <div class="detail-value">{{ form_data.submit_button_title or 'Submit' }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Encrypted</div>
+                                    <div class="detail-value">
+                                        {% if form_data.encrypted %}
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Yes</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">No</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Features -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-magic mr-2"></i> Advanced Features
+                            </div>
+                            <div class="details-body">
+                                <div class="detail-row">
+                                    <div class="detail-label">One Question at a Time</div>
+                                    <div class="detail-value">
+                                        {% if form_data.should_display_one_question_at_a_time %}
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Enabled</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">Disabled</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Workflow Form</div>
+                                    <div class="detail-value">
+                                        {% if form_data.is_workflow_form %}
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Yes</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">No</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Workflow Published</div>
+                                    <div class="detail-value">
+                                        {% if form_data.is_workflow_published %}
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Yes</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">No</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Has Approvers</div>
+                                    <div class="detail-value">
+                                        {% if form_data.has_approvers %}
+                                            <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">Yes</span>
+                                        {% else %}
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">No</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Partial Submissions -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-clock-o mr-2"></i> Partial Submissions ({{ partial_submissions|length }})
+                            </div>
+                            <div class="details-body">
+                                {% if partial_submissions %}
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                {% for submission in partial_submissions %}
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ submission.id }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ submission.created }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ submission.updated }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                                            <div class="bg-green-600 h-2 rounded-full" style="width: {{ submission.progress_percent or 0 }}%"></div>
+                                                        </div>
+                                                        <span class="text-xs">{{ submission.progress_percent or 0 }}%</span>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <p class="text-gray-500 text-center py-4">No partial submissions found.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Confirmations -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-check-circle mr-2"></i> Confirmations ({{ confirmations|length }})
+                            </div>
+                            <div class="details-body">
+                                {% if confirmations %}
+                                    {% for confirmation in confirmations %}
+                                    <div class="{% if not loop.last %}border-b border-gray-200 pb-4 mb-4{% endif %}">
+                                        <div class="detail-row">
+                                            <div class="detail-label">ID</div>
+                                            <div class="detail-value">{{ confirmation.id }}</div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Type</div>
+                                            <div class="detail-value">
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{{ confirmation.type or 'Default' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Message</div>
+                                            <div class="detail-value">{{ confirmation.message[:100] }}{% if confirmation.message and confirmation.message|length > 100 %}...{% endif %}</div>
+                                        </div>
+                                        {% if confirmation.redirect_url %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Redirect URL</div>
+                                            <div class="detail-value">
+                                                <a href="{{ confirmation.redirect_url }}" target="_blank" class="text-green-600 hover:text-green-800">{{ confirmation.redirect_url }}</a>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-gray-500 text-center py-4">No confirmations configured.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Notifications -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-bell mr-2"></i> Notifications ({{ notifications|length }})
+                            </div>
+                            <div class="details-body">
+                                {% if notifications %}
+                                    {% for notification in notifications %}
+                                    <div class="{% if not loop.last %}border-b border-gray-200 pb-4 mb-4{% endif %}">
+                                        <div class="detail-row">
+                                            <div class="detail-label">ID</div>
+                                            <div class="detail-value">{{ notification.id }}</div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Type</div>
+                                            <div class="detail-value">
+                                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">{{ notification.type or 'Email' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Name</div>
+                                            <div class="detail-value">{{ notification.name or 'Unnamed Notification' }}</div>
+                                        </div>
+                                        {% if notification.email %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Email</div>
+                                            <div class="detail-value">{{ notification.email }}</div>
+                                        </div>
+                                        {% endif %}
+                                        {% if notification.subject %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Subject</div>
+                                            <div class="detail-value">{{ notification.subject }}</div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Active</div>
+                                            <div class="detail-value">
+                                                {% if notification.active %}
+                                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Yes</span>
+                                                {% else %}
+                                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">No</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-gray-500 text-center py-4">No notifications configured.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Webhooks -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-link mr-2"></i> Webhooks ({{ webhooks|length }})
+                            </div>
+                            <div class="details-body">
+                                {% if webhooks %}
+                                    {% for webhook in webhooks %}
+                                    <div class="{% if not loop.last %}border-b border-gray-200 pb-4 mb-4{% endif %}">
+                                        <div class="detail-row">
+                                            <div class="detail-label">ID</div>
+                                            <div class="detail-value">{{ webhook.id }}</div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Name</div>
+                                            <div class="detail-value">{{ webhook.name or 'Unnamed Webhook' }}</div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">URL</div>
+                                            <div class="detail-value">
+                                                <a href="{{ webhook.url }}" target="_blank" class="text-green-600 hover:text-green-800 break-all">{{ webhook.url }}</a>
+                                            </div>
+                                        </div>
+                                        {% if webhook.method %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Method</div>
+                                            <div class="detail-value">
+                                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">{{ webhook.method }}</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Active</div>
+                                            <div class="detail-value">
+                                                {% if webhook.active %}
+                                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Yes</span>
+                                                {% else %}
+                                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">No</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% if webhook.handshake_key %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Handshake Key</div>
+                                            <div class="detail-value">
+                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Configured</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-gray-500 text-center py-4">No webhooks configured.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Integrations -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-puzzle-piece mr-2"></i> Integrations ({{ integrations|length }})
+                            </div>
+                            <div class="details-body">
+                                {% if integrations %}
+                                    {% for integration in integrations %}
+                                    <div class="{% if not loop.last %}border-b border-gray-200 pb-4 mb-4{% endif %}">
+                                        <div class="detail-row">
+                                            <div class="detail-label">ID</div>
+                                            <div class="detail-value">{{ integration.id }}</div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Type</div>
+                                            <div class="detail-value">
+                                                <span class="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">{{ integration.type or 'Unknown' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-row">
+                                            <div class="detail-label">Name</div>
+                                            <div class="detail-value">{{ integration.name or 'Unnamed Integration' }}</div>
+                                        </div>
+                                        {% if integration.service %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Service</div>
+                                            <div class="detail-value">{{ integration.service }}</div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Active</div>
+                                            <div class="detail-value">
+                                                {% if integration.active %}
+                                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Yes</span>
+                                                {% else %}
+                                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">No</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% if integration.created %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">Created</div>
+                                            <div class="detail-value">{{ integration.created }}</div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-gray-500 text-center py-4">No integrations configured.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Fields Summary -->
+                        <div class="details-card">
+                            <div class="details-header">
+                                <i class="fa fa-list mr-2"></i> Form Fields ({{ fields|length }})
+                            </div>
+                            <div class="details-body">
+                                {% if fields %}
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Label</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                {% for field in fields[:10] %} <!-- Show only first 10 fields for readability -->
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ field.id }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ field.label or 'Untitled Field' }}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">{{ field.type or 'text' }}</span>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {% if field.required %}
+                                                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Yes</span>
+                                                        {% else %}
+                                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">No</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                                {% if fields|length > 10 %}
+                                                <tr>
+                                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                                        ... and {{ fields|length - 10 }} more fields
+                                                    </td>
+                                                </tr>
+                                                {% endif %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <p class="text-gray-500 text-center py-4">No fields found.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Form ID input functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const formIdInput = document.getElementById('form-id-input');
+            const viewFormBtn = document.getElementById('view-form-btn');
+
+            if (formIdInput && viewFormBtn) {
+                // Handle button click
+                viewFormBtn.addEventListener('click', () => {
+                    const formId = formIdInput.value.trim();
+                    if (formId) {
+                        window.location.href = `/form-details/${formId}`;
+                    } else {
+                        alert('Please enter a form ID');
+                    }
+                });
+
+                // Handle Enter key press
+                formIdInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        viewFormBtn.click();
+                    }
+                });
+
+                // Focus on input when page loads
+                formIdInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

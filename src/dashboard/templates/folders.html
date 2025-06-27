@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formstack Folder Dashboard</title>
+    <!-- Tailwind CSS for overall styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 4rem;
+        }
+
+        .sidebar-brand {
+            background: #2c8150;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-brand:hover {
+            background: #237747;
+        }
+
+        .sidebar-nav {
+            background: #1f2937;
+        }
+
+        .sidebar-nav-item {
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            color: #d1d5db;
+            background: #374151;
+        }
+
+        .sidebar-nav-item.active {
+            color: #36b66c;
+            background: #ffffff;
+        }
+
+        /* Header styling */
+        .header-search input {
+            border: 4px solid transparent;
+        }
+
+        .header-search input:focus {
+            background-color: #f9fafb;
+            outline: none;
+        }
+
+        /* Dashboard stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border-radius: 0.5rem;
+        }
+
+        .stat-icon {
+            display: inline-flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            height: 4rem;
+            width: 4rem;
+            border-radius: 50%;
+            margin-right: 1.5rem;
+        }
+
+        .stat-icon.green {
+            color: #36b66c;
+            background-color: #dcfce7;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Refresh and Columns buttons styling */
+        .action-button {
+            background: #36b66c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .action-button:hover {
+            background: #237747;
+        }
+
+        /* Column visibility toggler dropdown container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            margin-top: 0.5rem;
+            width: 13rem;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 50;
+            padding: 1rem;
+        }
+        .dropdown-content label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+        }
+        .dropdown-content input[type="checkbox"] {
+            margin-right: 0.5rem;
+            height: 1rem;
+            width: 1rem;
+            accent-color: #36b66c;
+        }
+        .dropdown.open .dropdown-content {
+            display: block;
+        }
+
+        /* Table container for overflow and overall table card appearance */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        /* Specific styling for thead th elements */
+        thead th {
+            background: #36b66c;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+            text-align: left;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            border: none;
+            white-space: nowrap;
+            vertical-align: top;
+            transition: background 0.2s ease;
+        }
+
+        thead th:hover {
+            background: #237747;
+        }
+
+        thead th.asc::after { content: " ▲"; margin-left: 0.5rem; color: #ffffff; }
+        thead th.desc::after { content: " ▼"; margin-left: 0.5rem; color: #ffffff; }
+
+        /* Styling for the filter row (the second <tr> in thead) */
+        thead tr.filter-row {
+            display: none; /* Hide filters by default */
+        }
+        thead tr.filter-row.show {
+            display: table-row; /* Show filters when toggled */
+        }
+        thead tr.filter-row th {
+            background: #4bca81;
+            padding: 0.75rem;
+            border-top: none;
+        }
+
+        /* Filter input and select styling within table headers */
+        .filter-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .filter-control:focus {
+            outline: none;
+            border-color: #36b66c;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(54, 182, 108, 0.2);
+        }
+
+        .filter-control.select-filter {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 0.7rem 0.7rem;
+            cursor: pointer;
+        }
+
+        /* Table body rows and cells */
+        tbody td {
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+            max-width: 300px;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Folder hierarchy indentation */
+        .folder-indent-0 { padding-left: 0rem; }
+        .folder-indent-1 { padding-left: 2rem; }
+        .folder-indent-2 { padding-left: 4rem; }
+        .folder-indent-3 { padding-left: 6rem; }
+        .folder-indent-4 { padding-left: 8rem; }
+
+        /* Pagination controls container */
+        .pagination-controls {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        @media (min-width: 640px) {
+            .pagination-controls {
+                flex-direction: row;
+            }
+        }
+
+        .pagination-btn {
+            background: #36b66c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #237747;
+        }
+
+        .pagination-btn.active {
+            background: #237747;
+        }
+        .pagination-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .page-info {
+            color: #374151;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        @media (min-width: 640px) {
+            .page-info {
+                margin: 0;
+            }
+        }
+
+        .page-size-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.375rem;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-size-select:focus {
+            outline: none;
+            border-color: #36b66c;
+            box-shadow: 0 0 0 3px rgba(54, 182, 108, 0.1);
+        }
+
+        /* Badges for folder info */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .badge-green {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-blue {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-gray {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        /* No data message */
+        .no-data-message {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.125rem;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="sidebar hidden md:flex md:flex-shrink-0 h-full">
+            <div class="flex flex-col w-16 h-full">
+                <!-- Brand Section -->
+                <div class="sidebar-brand flex items-center justify-center h-16">
+                    <img src="https://images.icon-icons.com/2699/PNG/512/formstack_logo_icon_169154.png" alt="Formstack" class="h-8 w-8">
+                </div>
+                
+                <!-- Navigation -->
+                <div class="sidebar-nav flex-1 flex flex-col">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="/" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Dashboard">
+                            <i class="fa fa-dashboard"></i>
+                        </a>
+                        <a href="/folders" class="sidebar-nav-item active flex items-center justify-center py-3 text-lg rounded-md" title="Folders">
+                            <i class="fa fa-folder"></i>
+                        </a>
+                        <a href="/form-details" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Details">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                        <a href="/advanced-search" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Advanced Search">
+                            <i class="fa fa-search-plus"></i>
+                        </a>
+                        <a href="/audit" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Audit">
+                            <i class="fa fa-shield"></i>
+                        </a>
+                        <a href="/smartlists" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="SmartLists">
+                            <i class="fa fa-list-alt"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col w-0 flex-1 h-full overflow-hidden">
+            <!-- Top Header -->
+            <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 md:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="flex-1 px-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-semibold text-gray-900">Folders</h1>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <!-- Show Filters Button -->
+                        <button id="toggle-filters-button" class="action-button">
+                            <i class="fa fa-filter mr-2"></i> Filters
+                        </button>
+
+                        <!-- Refresh Button -->
+                        <button id="refresh-button" class="action-button">
+                            <i class="fa fa-refresh mr-2"></i> Refresh
+                        </button>
+
+                        <!-- Column Visibility Toggle Button -->
+                        <div class="dropdown" id="columns-dropdown">
+                            <button class="action-button" type="button" id="toggle-columns-button">
+                                <i class="fa fa-columns mr-2"></i> Columns
+                            </button>
+                            <div class="dropdown-content">
+                                <!-- Checkboxes for columns will be dynamically inserted here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                        <!-- Page Header -->
+                        <div class="mb-6">
+                            <h1 class="text-2xl font-bold text-gray-900">Folders</h1>
+                        </div>
+
+                        {% if error %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mb-6 shadow-md" role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline ml-2">{{ error }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if folders %}
+                        <!-- Dashboard Stats -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-folder fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="total-folders">{{ folder_stats.total_folders }}</div>
+                                    <div class="stat-label">Total Folders</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-folder-open fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="root-folders">{{ folder_stats.root_folders }}</div>
+                                    <div class="stat-label">Root Folders</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-wpforms fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="folders-with-forms">{{ folder_stats.folders_with_forms }}</div>
+                                    <div class="stat-label">Folders with Forms</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-file-text-o fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="total-forms-in-folders">{{ folder_stats.total_forms_in_folders }}</div>
+                                    <div class="stat-label">Forms in Folders</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table id="folderTable">
+                                <thead>
+                                    <tr>
+                                        <!-- Headers for sorting will be dynamically generated by JS -->
+                                    </tr>
+                                    <!-- Filter inputs row will be dynamically generated by JS after the main headers -->
+                                </thead>
+                                <tbody>
+                                    <!-- Table rows will be dynamically generated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination Controls -->
+                        <div class="pagination-controls">
+                            <div class="flex items-center space-x-3">
+                                <button id="prev-page" class="pagination-btn">Previous</button>
+                                <span id="page-info" class="page-info"></span>
+                                <button id="next-page" class="pagination-btn">Next</button>
+                            </div>
+                            <select id="page-size-select" class="page-size-select" title="Items per page">
+                                <option value="10">10 items per page</option>
+                                <option value="25">25 items per page</option>
+                                <option value="50">50 items per page</option>
+                                <option value="100">100 items per page</option>
+                                <option value="All">Show All</option>
+                            </select>
+                        </div>
+
+                        {% else %}
+                        {% if not error %}
+                        <div class="text-center py-12">
+                            <i class="fa fa-folder text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">No folders found or retrieved. Please check your API key and network connection.</p>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Hidden script tag to safely store JSON data -->
+    <script id="folders-data" type="application/json">
+        {{ folders | tojson }}
+    </script>
+
+    <script>
+        // Data passed from Flask
+        const foldersDataElement = document.getElementById('folders-data');
+        const initialFoldersData = JSON.parse(foldersDataElement.textContent);
+        
+        console.log('Folders Data:', initialFoldersData); 
+        let currentFoldersData = [...initialFoldersData];
+        let filteredFoldersData = [...initialFoldersData];
+        let currentPage = 1;
+        let pageSize = 10;
+        let sortColumn = 'folder_path';
+        let sortOrder = 'asc';
+
+        const folderTableBody = document.querySelector('#folderTable tbody');
+        const folderTableHeaderRow = document.querySelector('#folderTable thead tr');
+        const globalSearchInput = document.getElementById('global-search-input');
+        const pageInfoSpan = document.getElementById('page-info');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const pageSizeSelect = document.getElementById('page-size-select');
+        const refreshButton = document.getElementById('refresh-button');
+        const columnsDropdown = document.getElementById('columns-dropdown');
+        const toggleColumnsButton = document.getElementById('toggle-columns-button');
+        const columnsDropdownContent = columnsDropdown.querySelector('.dropdown-content');
+        const toggleFiltersButton = document.getElementById('toggle-filters-button');
+
+        // Define column definitions for folders
+        const columnDefinitions = [
+            { key: 'name', name: 'Folder Name', sortable: true, filterable: 'input', visible: true },
+            { key: 'folder_path', name: 'Path', sortable: true, filterable: 'input', visible: true },
+            { key: 'parent_name', name: 'Parent Folder', sortable: true, filterable: 'input', visible: true },
+            { key: 'form_count', name: 'Forms', sortable: true, filterable: 'input', visible: true },
+            { key: 'subfolder_count', name: 'Subfolders', sortable: true, filterable: 'input', visible: true },
+            { key: 'depth_level', name: 'Depth', sortable: true, filterable: 'input', visible: false },
+            { key: 'created_at', name: 'Created At', sortable: true, filterable: 'input', visible: false },
+            { key: 'is_root_folder', name: 'Root Folder', sortable: true, filterable: 'select', visible: false }
+        ];
+
+        // Global state for filter values
+        const columnFilters = {};
+
+        // --- Core Rendering Functions ---
+
+        function renderTableHeaders() {
+            const thead = document.querySelector('#folderTable thead');
+            const existingFilterRow = thead.querySelector('tr.filter-row');
+            const filtersWereVisible = existingFilterRow && existingFilterRow.classList.contains('show');
+            
+            thead.innerHTML = '';
+
+            const headerRow = document.createElement('tr');
+            const filterRow = document.createElement('tr');
+            filterRow.className = 'filter-row';
+            
+            if (filtersWereVisible) {
+                filterRow.classList.add('show');
+            }
+
+            columnDefinitions.forEach(col => {
+                if (col.visible) {
+                    // Header cell for column name
+                    const thHeader = document.createElement('th');
+                    thHeader.textContent = col.name;
+                    thHeader.setAttribute('data-key', col.key);
+
+                    if (col.sortable) {
+                        thHeader.classList.add('cursor-pointer');
+                        thHeader.addEventListener('click', () => handleHeaderSort(col.key));
+                        if (sortColumn === col.key) {
+                            thHeader.classList.add(sortOrder);
+                        }
+                    }
+                    headerRow.appendChild(thHeader);
+
+                    // Header cell for filter input/select
+                    const thFilter = document.createElement('th');
+                    if (col.filterable) {
+                        if (col.filterable === 'input') {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.placeholder = `Filter...`;
+                            input.className = 'filter-control';
+                            input.value = columnFilters[col.key] || '';
+                            input.addEventListener('input', (e) => {
+                                columnFilters[col.key] = e.target.value.toLowerCase();
+                                applyFilters();
+                            });
+                            thFilter.appendChild(input);
+                        } else if (col.filterable === 'select') {
+                            const select = document.createElement('select');
+                            select.className = 'filter-control select-filter';
+                            select.setAttribute('data-key', col.key);
+
+                            let options = [];
+                            if (col.key === 'is_root_folder') {
+                                options = ['All', 'Yes', 'No'];
+                            } else {
+                                options = ['All', ...new Set(initialFoldersData.map(folder => String(folder[col.key])).filter(Boolean))].sort();
+                            }
+
+                            options.forEach(optionText => {
+                                const option = document.createElement('option');
+                                option.value = optionText === 'All' ? '' : optionText;
+                                option.textContent = optionText;
+                                if ((columnFilters[col.key] || '') === option.value) {
+                                    option.selected = true;
+                                }
+                                select.appendChild(option);
+                            });
+
+                            select.addEventListener('change', (e) => {
+                                columnFilters[col.key] = e.target.value;
+                                applyFilters();
+                            });
+                            thFilter.appendChild(select);
+                        }
+                    }
+                    filterRow.appendChild(thFilter);
+                }
+            });
+            thead.appendChild(headerRow);
+            thead.appendChild(filterRow);
+        }
+
+        function renderTableRows(dataToRender) {
+            folderTableBody.innerHTML = '';
+
+            if (dataToRender.length === 0) {
+                folderTableBody.innerHTML = `<tr><td colspan="${columnDefinitions.filter(c => c.visible).length}" class="text-center py-4 text-gray-500">No matching folders found.</td></tr>`;
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = pageSize === 'All' ? dataToRender.length : startIndex + pageSize;
+            const paginatedData = dataToRender.slice(startIndex, endIndex);
+
+            paginatedData.forEach(rowData => {
+                const tr = document.createElement('tr');
+                columnDefinitions.forEach(col => {
+                    if (col.visible) {
+                        const td = document.createElement('td');
+                        let cellContent = rowData[col.key];
+
+                        // Apply special formatting
+                        if (col.key === 'name') {
+                            // Add indentation based on depth level
+                            const depth = Math.min(rowData.depth_level || 0, 4);
+                            const indentClass = `folder-indent-${depth}`;
+                            cellContent = `<div class="${indentClass}"><i class="fa fa-folder mr-2 text-green-600"></i>${cellContent}</div>`;
+                        } else if (col.key === 'is_root_folder') {
+                            cellContent = rowData.is_root_folder ? 'Yes' : 'No';
+                        } else if (col.key === 'form_count') {
+                            cellContent = `<span class="badge badge-green">${cellContent || 0}</span>`;
+                        } else if (col.key === 'subfolder_count') {
+                            cellContent = `<span class="badge badge-blue">${cellContent || 0}</span>`;
+                        } else if (col.key === 'parent_name') {
+                            cellContent = cellContent || '<span class="text-gray-400">None (Root)</span>';
+                        } else if (col.key === 'created_at') {
+                            cellContent = rowData[col.key] || 'N/A';
+                        }
+
+                        td.innerHTML = cellContent !== undefined && cellContent !== null ? cellContent : 'N/A';
+                        tr.appendChild(td);
+                    }
+                });
+                folderTableBody.appendChild(tr);
+            });
+        }
+
+        function renderPaginationControls(totalItems) {
+            const totalPages = pageSize === 'All' ? 1 : Math.ceil(totalItems / pageSize);
+            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages} (${totalItems} folders)`;
+
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages || pageSize === 'All';
+        }
+
+        function renderColumnVisibilityControls() {
+            columnsDropdownContent.innerHTML = '';
+            columnDefinitions.forEach(col => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = col.visible;
+                checkbox.className = 'form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded border-gray-300';
+                checkbox.addEventListener('change', (e) => {
+                    col.visible = e.target.checked;
+                    renderTable();
+                });
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(col.name));
+                columnsDropdownContent.appendChild(label);
+            });
+        }
+
+        // --- Event Handlers & Logic ---
+
+        function handleHeaderSort(key) {
+            if (sortColumn === key) {
+                sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = key;
+                sortOrder = 'asc';
+            }
+            applyFilters();
+        }
+
+        function applyFilters() {
+            // 1. Apply global search
+            const globalSearchText = globalSearchInput.value.toLowerCase();
+            let tempFilteredData = initialFoldersData.filter(row => {
+                if (!globalSearchText) return true;
+                return columnDefinitions.some(col => {
+                    const cellValue = String(row[col.key] || '').toLowerCase();
+                    return cellValue.includes(globalSearchText);
+                });
+            });
+
+            // 2. Apply column-specific filters
+            tempFilteredData = tempFilteredData.filter(row => {
+                return Object.keys(columnFilters).every(key => {
+                    const filterValue = columnFilters[key];
+                    if (!filterValue) return true;
+
+                    let rowValue = String(row[key] || '').toLowerCase();
+                    
+                    if (key === 'is_root_folder') {
+                        rowValue = row.is_root_folder ? 'yes' : 'no';
+                    }
+                    
+                    return rowValue.includes(filterValue.toLowerCase());
+                });
+            });
+
+            // 3. Apply sorting
+            tempFilteredData.sort((a, b) => {
+                const valA = a[sortColumn];
+                const valB = b[sortColumn];
+
+                let comparableValA = valA;
+                let comparableValB = valB;
+
+                if (sortColumn === 'created_at') {
+                    comparableValA = new Date(valA);
+                    comparableValB = new Date(valB);
+                } else if (['form_count', 'subfolder_count', 'depth_level'].includes(sortColumn)) {
+                    comparableValA = Number(valA);
+                    comparableValB = Number(valB);
+                } else if (sortColumn === 'is_root_folder') {
+                    comparableValA = !valA;
+                    comparableValB = !valB;
+                }
+
+                if (comparableValA === null || comparableValA === undefined || (typeof comparableValA === 'object' && isNaN(comparableValA.getTime && comparableValA.getTime()))) return sortOrder === 'asc' ? 1 : -1;
+                if (comparableValB === null || comparableValB === undefined || (typeof comparableValB === 'object' && isNaN(comparableValB.getTime && comparableValB.getTime()))) return sortOrder === 'asc' ? -1 : 1;
+
+                let comparisonResult;
+                if (typeof comparableValA === 'number' && typeof comparableValB === 'number') {
+                    comparisonResult = comparableValA - comparableValB;
+                } else if (typeof comparableValA === 'boolean' && typeof comparableValB === 'boolean') {
+                    comparisonResult = comparableValA === comparableValB ? 0 : (comparableValA ? 1 : -1);
+                } else {
+                    comparisonResult = String(comparableValA).localeCompare(String(comparableValB));
+                }
+
+                return sortOrder === 'asc' ? comparisonResult : -comparisonResult;
+            });
+
+            filteredFoldersData = tempFilteredData;
+            currentPage = 1;
+            renderTable();
+        }
+
+        function renderTable() {
+            renderTableHeaders();
+            renderTableRows(filteredFoldersData);
+            renderPaginationControls(filteredFoldersData.length);
+            renderColumnVisibilityControls();
+        }
+
+        // --- Initialization ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable();
+
+            // Event Listeners for controls
+            globalSearchInput.addEventListener('input', applyFilters);
+
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+
+            nextPageBtn.addEventListener('click', () => {
+                const totalPages = pageSize === 'All' ? 1 : Math.ceil(filteredFoldersData.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+
+            pageSizeSelect.addEventListener('change', (e) => {
+                pageSize = e.target.value === 'All' ? 'All' : parseInt(e.target.value, 10);
+                currentPage = 1;
+                renderTable();
+            });
+
+            refreshButton.addEventListener('click', () => {
+                globalSearchInput.value = '';
+                for (const key in columnFilters) {
+                    delete columnFilters[key];
+                }
+                document.querySelectorAll('.filter-control').forEach(control => {
+                    if (control.tagName === 'INPUT') control.value = '';
+                    if (control.tagName === 'SELECT') control.value = '';
+                });
+                currentFoldersData = [...initialFoldersData];
+                filteredFoldersData = [...initialFoldersData];
+                currentPage = 1;
+                sortColumn = 'folder_path';
+                sortOrder = 'asc';
+                renderTable();
+            });
+
+            // Toggle columns dropdown
+            toggleColumnsButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                columnsDropdown.classList.toggle('open');
+            });
+
+            // Toggle filters visibility
+            toggleFiltersButton.addEventListener('click', () => {
+                const filterRow = document.querySelector('#folderTable thead tr.filter-row');
+                if (filterRow) {
+                    filterRow.classList.toggle('show');
+                    const isVisible = filterRow.classList.contains('show');
+                    toggleFiltersButton.innerHTML = isVisible ? 
+                        '<i class="fa fa-filter mr-2"></i> Hide Filters' : 
+                        '<i class="fa fa-filter mr-2"></i> Filters';
+                }
+            });
+
+            // Close column dropdown when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!columnsDropdown.contains(event.target)) {
+                    columnsDropdown.classList.remove('open');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

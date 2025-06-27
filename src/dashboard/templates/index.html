@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formstack Form Dashboard</title>
+    <!-- Tailwind CSS for overall styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 4rem;
+        }
+
+        .sidebar-brand {
+            background: #2c8150;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-brand:hover {
+            background: #237747;
+        }
+
+        .sidebar-nav {
+            background: #1f2937;
+        }
+
+        .sidebar-nav-item {
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            color: #d1d5db;
+            background: #374151;
+        }
+
+        .sidebar-nav-item.active {
+            color: #36b66c;
+            background: #ffffff;
+        }
+
+        /* Header styling */
+        .header-search input {
+            border: 4px solid transparent;
+        }
+
+        .header-search input:focus {
+            background-color: #f9fafb;
+            outline: none;
+        }
+
+        /* Dashboard stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border-radius: 0.5rem;
+        }
+
+        .stat-icon {
+            display: inline-flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            height: 4rem;
+            width: 4rem;
+            border-radius: 50%;
+            margin-right: 1.5rem;
+        }
+
+        .stat-icon.green {
+            color: #36b66c;
+            background-color: #dcfce7;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* No data message */
+        .no-data-message {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.125rem;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="sidebar hidden md:flex md:flex-shrink-0 h-full">
+            <div class="flex flex-col w-16 h-full">
+                <!-- Brand Section -->
+                <div class="sidebar-brand flex items-center justify-center h-16">
+                    <img src="https://images.icon-icons.com/2699/PNG/512/formstack_logo_icon_169154.png" alt="Formstack" class="h-8 w-8">
+                </div>
+                
+                <!-- Navigation -->
+                <div class="sidebar-nav flex-1 flex flex-col">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="/" class="sidebar-nav-item active flex items-center justify-center py-3 text-lg rounded-md" title="Dashboard">
+                            <i class="fa fa-dashboard"></i>
+                        </a>
+                        <a href="/folders" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Folders">
+                            <i class="fa fa-folder"></i>
+                        </a>
+                        <a href="/form-details" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Details">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                        <a href="/advanced-search" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Advanced Search">
+                            <i class="fa fa-search-plus"></i>
+                        </a>
+                        <a href="/audit" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Audit">
+                            <i class="fa fa-shield"></i>
+                        </a>
+                        <a href="/smartlists" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="SmartLists">
+                            <i class="fa fa-list-alt"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col w-0 flex-1 h-full overflow-hidden">
+            <!-- Top Header -->
+            <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 md:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="flex-1 px-4 flex items-center">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                        {% if error %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mb-6 shadow-md" role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline ml-2">{{ error }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if forms %}
+                        <!-- Dashboard Stats -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-wpforms fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="total-forms">{{ forms|length }}</div>
+                                    <div class="stat-label">Total Forms</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-check-circle fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="active-forms">0</div>
+                                    <div class="stat-label">Active Forms</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-file-text-o fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="total-submissions">0</div>
+                                    <div class="stat-label">Total Submissions</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fa fa-envelope fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-number" id="unread-submissions">0</div>
+                                    <div class="stat-label">Unread Submissions</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Developer Resources Section -->
+                        <div class="mt-8">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-6">Developer Resources</h2>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <!-- API Documentation Card -->
+                                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fa fa-code text-blue-600"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-2">API Documentation</h3>
+                                            <p class="text-gray-600 text-sm mb-4">
+                                                Complete reference for Formstack's REST API with endpoints, authentication, and examples.
+                                            </p>
+                                            <a href="https://developers.formstack.com/reference/api-overview" target="_blank" rel="noopener" 
+                                               class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                View API Docs
+                                                <i class="fa fa-external-link ml-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Developer Resources Card -->
+                                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                                <i class="fa fa-book text-green-600"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-2">Developer Guides</h3>
+                                            <p class="text-gray-600 text-sm mb-4">
+                                                Comprehensive guides, tutorials, and best practices for building with Formstack.
+                                            </p>
+                                            <a href="https://formstack.my.site.com/s/article/Developer-Resources" target="_blank" rel="noopener" 
+                                               class="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium">
+                                                Browse Resources
+                                                <i class="fa fa-external-link ml-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Stats Section -->
+                            <div class="mt-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-gray-100">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-2 text-left">About This Application</h3>
+                                        <p class="text-sm text-gray-600 text-left">
+                                            This Formstack management application was created by <strong>Emin Devrim Fidan</strong> for internal use 
+                                            with an API key named "New Application". Pages are developed in VS Code with GitHub Copilot assistance 
+                                            and manual coding using Python, JavaScript, and other technologies.
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- Ko-fi Widget -->
+                                    <div class="ml-6 flex-shrink-0">
+                                        <div id="kofi-widget-container">
+                                            <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+                                            <script type='text/javascript'>kofiwidget2.init('Fuel me with some coffee', '#72a4f2', '8d21c2ec2c9370f');kofiwidget2.draw();</script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% else %}
+                        {% if not error %}
+                        <div class="text-center py-12">
+                            <i class="fa fa-wpforms text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">No forms found or retrieved. Please check your API key and network connection.</p>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Hidden script tag to safely store JSON data -->
+    <script id="forms-data" type="application/json">
+        {{ all_forms | tojson }}
+    </script>
+
+    <script>
+        // Data passed from Flask
+        // Retrieve JSON string from the script tag and parse it
+        const formsDataElement = document.getElementById('forms-data');
+        const initialFormsData = JSON.parse(formsDataElement.textContent);
+        
+        console.log('Forms Data:', initialFormsData); 
+
+        // --- Dashboard Stats Update Function ---
+
+        function updateDashboardStats() {
+            if (initialFormsData && initialFormsData.length > 0) {
+                const totalForms = initialFormsData.length;
+                const activeForms = initialFormsData.filter(form => !form.is_inactive).length;
+                const totalSubmissions = initialFormsData.reduce((sum, form) => sum + (form.submissions_count || 0), 0);
+                const unreadSubmissions = initialFormsData.reduce((sum, form) => sum + (form.submissions_unread_count || 0), 0);
+
+                // Update the DOM elements
+                const totalFormsElement = document.getElementById('total-forms');
+                const activeFormsElement = document.getElementById('active-forms');
+                const totalSubmissionsElement = document.getElementById('total-submissions');
+                const unreadSubmissionsElement = document.getElementById('unread-submissions');
+
+                if (totalFormsElement) totalFormsElement.textContent = totalForms;
+                if (activeFormsElement) activeFormsElement.textContent = activeForms;
+                if (totalSubmissionsElement) totalSubmissionsElement.textContent = totalSubmissions.toLocaleString();
+                if (unreadSubmissionsElement) unreadSubmissionsElement.textContent = unreadSubmissions.toLocaleString();
+            }
+        }
+
+        // --- Initialization ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDashboardStats(); // Update stats on page load
+        });
+    </script>
+
+</body>
+</html>
+

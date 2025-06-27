@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Analytics & Audit - Formstack Dashboard</title>
+    <!-- Tailwind CSS for overall styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 4rem;
+        }
+
+        .sidebar-brand {
+            background: #2c8150;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-brand:hover {
+            background: #237747;
+        }
+
+        .sidebar-nav {
+            background: #1f2937;
+        }
+
+        .sidebar-nav-item {
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            color: #d1d5db;
+            background: #374151;
+        }
+
+        .sidebar-nav-item.active {
+            color: #36b66c;
+            background: #ffffff;
+        }
+
+        /* Analytics cards styling */
+        .analytics-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .analytics-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-description {
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+
+        /* Loading spinner */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 3rem;
+            height: 3rem;
+            border: 0.25rem solid #f3f4f6;
+            border-top: 0.25rem solid #36b66c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Section styling */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+            color: #36b66c;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="sidebar hidden md:flex md:flex-shrink-0 h-full">
+            <div class="flex flex-col w-16 h-full">
+                <!-- Brand Section -->
+                <div class="sidebar-brand flex items-center justify-center h-16">
+                    <img src="https://images.icon-icons.com/2699/PNG/512/formstack_logo_icon_169154.png" alt="Formstack" class="h-8 w-8">
+                </div>
+                
+                <!-- Navigation -->
+                <div class="sidebar-nav flex-1 flex flex-col">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="/" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Dashboard">
+                            <i class="fa fa-dashboard"></i>
+                        </a>
+                        <a href="/folders" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Folders">
+                            <i class="fa fa-folder"></i>
+                        </a>
+                        <a href="/form-details" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Form Details">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                        <a href="/advanced-search" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="Advanced Search">
+                            <i class="fa fa-search-plus"></i>
+                        </a>
+                        <a href="/audit" class="sidebar-nav-item active flex items-center justify-center py-3 text-lg rounded-md" title="Form Analytics & Audit">
+                            <i class="fa fa-shield"></i>
+                        </a>
+                        <a href="/smartlists" class="sidebar-nav-item flex items-center justify-center py-3 text-lg rounded-md" title="SmartLists">
+                            <i class="fa fa-list-alt"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col w-0 flex-1 h-full overflow-hidden">
+            <!-- Top Header -->
+            <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 md:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="flex-1 px-4 flex justify-between items-center">
+                    <h1 class="text-2xl font-semibold text-gray-900">Form Analytics & Audit</h1>
+                    <div class="text-sm text-gray-500" id="last-updated">
+                        Last updated: <span id="update-time">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                        
+                        <!-- Loading State -->
+                        <div id="loading" class="loading">
+                            <div class="spinner"></div>
+                            <p class="mt-4 text-gray-600">Analyzing your forms...</p>
+                        </div>
+
+                        <!-- Analytics Content -->
+                        <div id="analytics-content" class="hidden">
+                            
+                            <!-- Overview Section -->
+                            <div class="section-title">
+                                <i class="fa fa-chart-bar"></i>
+                                Form Overview
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <!-- Total Forms -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-blue-100">
+                                        <i class="fa fa-files-o text-blue-600"></i>
+                                    </div>
+                                    <div class="card-number text-blue-600" id="total-forms">0</div>
+                                    <div class="card-label text-gray-600">Total Forms</div>
+                                    <div class="card-description text-gray-500">All forms in your account</div>
+                                </div>
+
+                                <!-- Active Forms -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-green-100">
+                                        <i class="fa fa-check-circle text-green-600"></i>
+                                    </div>
+                                    <div class="card-number text-green-600" id="active-forms">0</div>
+                                    <div class="card-label text-gray-600">Active Forms</div>
+                                    <div class="card-description text-gray-500">Forms currently accepting submissions</div>
+                                </div>
+
+                                <!-- Forms with Submissions -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-purple-100">
+                                        <i class="fa fa-inbox text-purple-600"></i>
+                                    </div>
+                                    <div class="card-number text-purple-600" id="forms-with-submissions">0</div>
+                                    <div class="card-label text-gray-600">Forms with Data</div>
+                                    <div class="card-description text-gray-500">Forms that have received submissions</div>
+                                </div>
+
+                                <!-- Unused Forms -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-orange-100">
+                                        <i class="fa fa-exclamation-triangle text-orange-600"></i>
+                                    </div>
+                                    <div class="card-number text-orange-600" id="unused-forms">0</div>
+                                    <div class="card-label text-gray-600">Unused Forms</div>
+                                    <div class="card-description text-gray-500">Forms with no submissions</div>
+                                </div>
+                            </div>
+
+                            <!-- Usage Analytics Section -->
+                            <div class="section-title">
+                                <i class="fa fa-activity"></i>
+                                Usage Analytics
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                                <!-- Recent Activity (30 days) -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-emerald-100">
+                                        <i class="fa fa-calendar text-emerald-600"></i>
+                                    </div>
+                                    <div class="card-number text-emerald-600" id="recent-activity">0</div>
+                                    <div class="card-label text-gray-600">Active (30 days)</div>
+                                    <div class="card-description text-gray-500">Forms with submissions in last 30 days</div>
+                                </div>
+
+                                <!-- Stale Forms (6+ months) -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-yellow-100">
+                                        <i class="fa fa-clock-o text-yellow-600"></i>
+                                    </div>
+                                    <div class="card-number text-yellow-600" id="stale-forms">0</div>
+                                    <div class="card-label text-gray-600">Stale (6+ months)</div>
+                                    <div class="card-description text-gray-500">Forms with no recent submissions</div>
+                                </div>
+
+                                <!-- Dormant Forms (1+ year) -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-red-100">
+                                        <i class="fa fa-archive text-red-600"></i>
+                                    </div>
+                                    <div class="card-number text-red-600" id="dormant-forms">0</div>
+                                    <div class="card-label text-gray-600">Dormant (1+ year)</div>
+                                    <div class="card-description text-gray-500">Forms inactive for over a year</div>
+                                </div>
+                            </div>
+
+                            <!-- Health & Recommendations Section -->
+                            <div class="section-title">
+                                <i class="fa fa-heartbeat"></i>
+                                Form Health & Recommendations
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <!-- Health Score -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-indigo-100">
+                                        <i class="fa fa-tachometer text-indigo-600"></i>
+                                    </div>
+                                    <div class="card-number text-indigo-600" id="health-score">0%</div>
+                                    <div class="card-label text-gray-600">Health Score</div>
+                                    <div class="card-description text-gray-500">Percentage of forms actively in use</div>
+                                </div>
+
+                                <!-- Action Items -->
+                                <div class="analytics-card">
+                                    <div class="card-icon bg-pink-100">
+                                        <i class="fa fa-list-ul text-pink-600"></i>
+                                    </div>
+                                    <div class="card-number text-pink-600" id="action-items">0</div>
+                                    <div class="card-label text-gray-600">Action Items</div>
+                                    <div class="card-description text-gray-500">Forms needing attention</div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Insights -->
+                            <div class="section-title">
+                                <i class="fa fa-lightbulb-o"></i>
+                                Insights & Recommendations
+                            </div>
+                            
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <div id="insights-list" class="space-y-4">
+                                    <!-- Insights will be populated here -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the analytics dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAnalytics();
+        });
+
+        async function loadAnalytics() {
+            try {
+                // Show loading state
+                document.getElementById('loading').classList.remove('hidden');
+                document.getElementById('analytics-content').classList.add('hidden');
+
+                // Simulate loading time for better UX
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Fetch forms data
+                const response = await fetch('/api/advanced-search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch forms data');
+                }
+
+                const data = await response.json();
+                const forms = data.forms || [];
+
+                // Calculate analytics
+                calculateAndDisplayAnalytics(forms);
+
+                // Update timestamp
+                document.getElementById('update-time').textContent = new Date().toLocaleString();
+
+                // Show analytics content
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('analytics-content').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-center">
+                        <i class="fa fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                        <p class="text-red-600 text-lg">Failed to load analytics</p>
+                        <p class="text-gray-500 text-sm mt-2">Please check your connection and try again</p>
+                        <button onclick="loadAnalytics()" class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fa fa-refresh mr-2"></i>Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateAndDisplayAnalytics(forms) {
+            const now = new Date();
+            const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+            const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6));
+            const oneYearAgo = new Date(now.setFullYear(now.getFullYear() - 1));
+
+            // Reset dates for calculations
+            const currentDate = new Date();
+
+            // Basic counts
+            const totalForms = forms.length;
+            const activeForms = forms.filter(form => !form.is_inactive).length;
+            const formsWithSubmissions = forms.filter(form => form.submissions_count > 0).length;
+            const unusedForms = forms.filter(form => form.submissions_count === 0).length;
+
+            // Usage analytics
+            const recentlyActive = forms.filter(form => {
+                if (!form.last_submission_at) return false;
+                const lastSubmission = new Date(form.last_submission_at);
+                const thirtyDaysAgo = new Date(currentDate.getTime() - (30 * 24 * 60 * 60 * 1000));
+                return lastSubmission >= thirtyDaysAgo;
+            }).length;
+
+            const staleForms = forms.filter(form => {
+                if (!form.last_submission_at) return form.submissions_count === 0;
+                const lastSubmission = new Date(form.last_submission_at);
+                const sixMonthsAgo = new Date(currentDate.getTime() - (6 * 30 * 24 * 60 * 60 * 1000));
+                return lastSubmission < sixMonthsAgo;
+            }).length;
+
+            const dormantForms = forms.filter(form => {
+                if (!form.last_submission_at) return form.submissions_count === 0;
+                const lastSubmission = new Date(form.last_submission_at);
+                const oneYearAgo = new Date(currentDate.getTime() - (365 * 24 * 60 * 60 * 1000));
+                return lastSubmission < oneYearAgo;
+            }).length;
+
+            // Health score (percentage of forms that are actively used)
+            const healthScore = totalForms > 0 ? Math.round((formsWithSubmissions / totalForms) * 100) : 0;
+
+            // Action items (forms that might need attention)
+            const actionItems = unusedForms + staleForms;
+
+            // Update UI
+            document.getElementById('total-forms').textContent = totalForms.toLocaleString();
+            document.getElementById('active-forms').textContent = activeForms.toLocaleString();
+            document.getElementById('forms-with-submissions').textContent = formsWithSubmissions.toLocaleString();
+            document.getElementById('unused-forms').textContent = unusedForms.toLocaleString();
+            document.getElementById('recent-activity').textContent = recentlyActive.toLocaleString();
+            document.getElementById('stale-forms').textContent = staleForms.toLocaleString();
+            document.getElementById('dormant-forms').textContent = dormantForms.toLocaleString();
+            document.getElementById('health-score').textContent = healthScore + '%';
+            document.getElementById('action-items').textContent = actionItems.toLocaleString();
+
+            // Generate insights
+            generateInsights(forms, {
+                totalForms,
+                activeForms,
+                formsWithSubmissions,
+                unusedForms,
+                recentlyActive,
+                staleForms,
+                dormantForms,
+                healthScore
+            });
+        }
+
+        function generateInsights(forms, stats) {
+            const insights = [];
+            const insightsList = document.getElementById('insights-list');
+
+            // Health insights
+            if (stats.healthScore >= 80) {
+                insights.push({
+                    type: 'success',
+                    icon: 'fa-check-circle',
+                    title: 'Excellent Form Health',
+                    description: `${stats.healthScore}% of your forms are actively collecting data. Your form portfolio is well-maintained!`
+                });
+            } else if (stats.healthScore >= 60) {
+                insights.push({
+                    type: 'warning',
+                    icon: 'fa-exclamation-triangle',
+                    title: 'Good Form Health',
+                    description: `${stats.healthScore}% of your forms are active. Consider reviewing unused forms for potential cleanup.`
+                });
+            } else {
+                insights.push({
+                    type: 'danger',
+                    icon: 'fa-times-circle',
+                    title: 'Form Health Needs Attention',
+                    description: `Only ${stats.healthScore}% of your forms are actively used. Consider archiving or removing unused forms.`
+                });
+            }
+
+            // Usage insights
+            if (stats.unusedForms > 0) {
+                insights.push({
+                    type: 'info',
+                    icon: 'fa-info-circle',
+                    title: 'Unused Forms Detected',
+                    description: `${stats.unusedForms} forms have never received submissions. These might be drafts or test forms that can be cleaned up.`
+                });
+            }
+
+            if (stats.staleForms > 0) {
+                insights.push({
+                    type: 'warning',
+                    icon: 'fa-clock-o',
+                    title: 'Stale Forms Found',
+                    description: `${stats.staleForms} forms haven't received submissions in 6+ months. Review if these are still needed.`
+                });
+            }
+
+            if (stats.recentlyActive > 0) {
+                insights.push({
+                    type: 'success',
+                    icon: 'fa-trending-up',
+                    title: 'Recent Activity',
+                    description: `${stats.recentlyActive} forms received submissions in the last 30 days, showing good engagement.`
+                });
+            }
+
+            // Activity recommendations
+            const inactiveButActive = forms.filter(form => form.is_inactive && form.submissions_count > 0).length;
+            if (inactiveButActive > 0) {
+                insights.push({
+                    type: 'warning',
+                    icon: 'fa-pause-circle',
+                    title: 'Inactive Forms with Data',
+                    description: `${inactiveButActive} inactive forms have submission data. Consider if they should be reactivated.`
+                });
+            }
+
+            // Render insights
+            insightsList.innerHTML = insights.map(insight => `
+                <div class="flex items-start space-x-4 p-4 rounded-lg ${getInsightBackground(insight.type)}">
+                    <div class="flex-shrink-0">
+                        <i class="fa ${insight.icon} text-2xl ${getInsightColor(insight.type)}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 mb-1">${insight.title}</h4>
+                        <p class="text-gray-600 text-sm">${insight.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getInsightBackground(type) {
+            switch (type) {
+                case 'success': return 'bg-green-50 border border-green-200';
+                case 'warning': return 'bg-yellow-50 border border-yellow-200';
+                case 'danger': return 'bg-red-50 border border-red-200';
+                case 'info': return 'bg-blue-50 border border-blue-200';
+                default: return 'bg-gray-50 border border-gray-200';
+            }
+        }
+
+        function getInsightColor(type) {
+            switch (type) {
+                case 'success': return 'text-green-600';
+                case 'warning': return 'text-yellow-600';
+                case 'danger': return 'text-red-600';
+                case 'info': return 'text-blue-600';
+                default: return 'text-gray-600';
+            }
+        }
+    </script>
+</body>
+</html>
