@@ -2,7 +2,7 @@
 
 A comprehensive Python-based dashboard for managing and analyzing Formstack forms, folders, and data. Built with Flask, this application provides detailed insights into form usage, analytics, and management capabilities through a modern web interface.
 
-![Formstack Manager Dashboard](https://via.placeholder.com/800x400?text=Formstack+Manager+Dashboard)
+![Formstack Manager Dashboard](src/dashboard/assets/form_dashboard.gif)
 
 ## 🚀 Features
 
