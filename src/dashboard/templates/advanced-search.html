@@ -1002,9 +1002,17 @@
                                 break;
                             case 'status':
                                 td.innerHTML = `
-                                    <span class="status-badge ${form.is_inactive ? 'status-inactive' : 'status-active'}">
-                                        ${form.is_inactive ? 'Inactive' : 'Active'}
-                                    </span>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="status-badge ${form.is_inactive ? 'status-inactive' : 'status-active'}">
+                                            ${form.is_inactive ? 'Inactive' : 'Active'}
+                                        </span>
+                                        <div class="flex flex-col items-center" title="Toggle Form Status">
+                                            <label class="toggle-switch" style="width: 2.5rem; height: 1.25rem;">
+                                                <input type="checkbox" ${!form.is_inactive ? 'checked' : ''} onchange="toggleFormStatus(${form.id}, this)" data-form-id="${form.id}">
+                                                <span class="toggle-slider" style="border-radius: 1.25rem;"></span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 `;
                                 break;
                             case 'folder_name':
@@ -1148,15 +1156,98 @@
             performSearch();
         }
 
-        // Toggle form status functions moved to form-details.html
-        // 
-        // async function toggleFormStatus(formId, toggleElement) {
-        //     // Function moved to form details page
-        // }
-        //
-        // async function refreshFormData() {
-        //     // Function moved to form details page  
-        // }
+        // Toggle form status (active/inactive)
+        async function toggleFormStatus(formId, toggleElement) {
+            const isNowActive = toggleElement.checked;
+            
+            // Disable the toggle while updating to prevent double-clicks
+            toggleElement.disabled = true;
+            
+            try {
+                // Make API call to update form status
+                const response = await fetch('/api/update-form-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        form_id: formId,
+                        active: isNowActive
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success notification
+                    showStatusUpdateNotification(formId, isNowActive, true);
+                    
+                    // Refresh form data from server to get the latest status
+                    await refreshFormData();
+                } else {
+                    // Revert the toggle on error
+                    toggleElement.checked = !isNowActive;
+                    
+                    // Show error notification
+                    showStatusUpdateNotification(formId, isNowActive, false, result.error);
+                }
+            } catch (error) {
+                console.error('Error updating form status:', error);
+                
+                // Revert the toggle on error
+                toggleElement.checked = !isNowActive;
+                
+                // Show error notification
+                showStatusUpdateNotification(formId, isNowActive, false, 'Network error occurred');
+            } finally {
+                // Re-enable the toggle
+                toggleElement.disabled = false;
+            }
+        }
+
+        // Refresh form data from server
+        async function refreshFormData() {
+            try {
+                console.log('Refreshing form data from server...');
+                
+                // Show a subtle loading indicator
+                const originalPlaceholder = document.getElementById('global-search-input').placeholder;
+                document.getElementById('global-search-input').placeholder = 'Refreshing data...';
+                
+                // Fetch fresh data from the server
+                const response = await fetch('/advanced-search');
+                const html = await response.text();
+                
+                // Parse the HTML to extract the forms data
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const formsDataElement = doc.getElementById('forms-data');
+                
+                if (formsDataElement) {
+                    // Update the global forms data
+                    const newFormsData = JSON.parse(formsDataElement.textContent);
+                    
+                    // Update our cached data
+                    allForms.length = 0; // Clear existing array
+                    allForms.push(...newFormsData); // Add new data
+                    
+                    console.log(`Refreshed data: ${allForms.length} forms loaded`);
+                    
+                    // Re-run the current search to update the display
+                    performSearch();
+                } else {
+                    console.error('Could not find forms data in refreshed HTML');
+                }
+                
+                // Restore placeholder
+                document.getElementById('global-search-input').placeholder = originalPlaceholder;
+                
+            } catch (error) {
+                console.error('Error refreshing form data:', error);
+                // Restore placeholder on error
+                document.getElementById('global-search-input').placeholder = 'Search forms...';
+            }
+        }
 
         // Helper function to get column index by key
         function getColumnIndex(columnKey) {
@@ -1172,11 +1263,50 @@
             return -1;
         }
 
-        // Status notification function moved to form-details.html
-        // function showStatusUpdateNotification(...) { ... }
+        // Show status update notification
+        function showStatusUpdateNotification(formId, isActive, success = true, errorMessage = '') {
+            // Create notification element
+            const notification = document.createElement('div');
+            const bgColor = success ? 'bg-green-500' : 'bg-red-500';
+            const icon = success 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+            
+            const message = success 
+                ? `Form ${formId} is now ${isActive ? 'Active' : 'Inactive'}`
+                : `Failed to update form ${formId}: ${errorMessage}`;
+            
+            notification.className = `fixed top-20 right-4 z-50 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${icon}
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Animate out and remove (longer duration for error messages)
+            const duration = success ? 3000 : 5000;
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
 
-        // Form status toggle functionality moved to form-details.html
-        // window.toggleFormStatus = toggleFormStatus;
+        // Make toggleFormStatus globally available
+        window.toggleFormStatus = toggleFormStatus;
     </script>
 </body>
 </html>
