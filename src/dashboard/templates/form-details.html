@@ -179,6 +179,57 @@
             border-color: #36b66c;
             box-shadow: 0 0 0 3px rgba(54, 182, 108, 0.1);
         }
+
+        /* Toggle switch styling */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 3rem;
+            height: 1.5rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 1.5rem;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 1.125rem;
+            width: 1.125rem;
+            left: 0.1875rem;
+            bottom: 0.1875rem;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #36b66c;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(1.5rem);
+        }
+
+        .toggle-switch input:disabled + .toggle-slider {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-gray-50 h-screen overflow-hidden">
@@ -329,11 +380,17 @@
                                 <div class="detail-row">
                                     <div class="detail-label">Status</div>
                                     <div class="detail-value">
-                                        {% if form_data.inactive %}
-                                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">Inactive</span>
-                                        {% else %}
-                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Active</span>
-                                        {% endif %}
+                                        <div class="flex items-center space-x-3">
+                                            <span id="status-badge" class="px-2 py-1 rounded-full text-sm {% if form_data.inactive %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                                {% if form_data.inactive %}Inactive{% else %}Active{% endif %}
+                                            </span>
+                                            <div class="flex flex-col items-center" title="Toggle Form Status">
+                                                <label class="toggle-switch" style="width: 2.5rem; height: 1.25rem;">
+                                                    <input id="status-toggle" type="checkbox" {% if not form_data.inactive %}checked{% endif %} onchange="toggleFormStatus({{ form_data.id }}, this)" data-form-id="{{ form_data.id }}">
+                                                    <span class="toggle-slider" style="border-radius: 1.25rem;"></span>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="detail-row">
@@ -783,6 +840,101 @@
                 formIdInput.focus();
             }
         });
+
+        // Toggle form status (active/inactive)
+        async function toggleFormStatus(formId, toggleElement) {
+            const isNowActive = toggleElement.checked;
+            
+            // Disable the toggle while updating to prevent double-clicks
+            toggleElement.disabled = true;
+            
+            try {
+                // Make API call to update form status
+                const response = await fetch('/api/update-form-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        form_id: formId,
+                        active: isNowActive
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update the status badge
+                    const statusBadge = document.getElementById('status-badge');
+                    if (statusBadge) {
+                        statusBadge.className = `px-2 py-1 rounded-full text-sm ${isNowActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+                        statusBadge.textContent = isNowActive ? 'Active' : 'Inactive';
+                    }
+                    
+                    // Show success notification
+                    showStatusUpdateNotification(formId, isNowActive, true);
+                } else {
+                    // Revert the toggle on error
+                    toggleElement.checked = !isNowActive;
+                    
+                    // Show error notification
+                    showStatusUpdateNotification(formId, isNowActive, false, result.error);
+                }
+            } catch (error) {
+                console.error('Error updating form status:', error);
+                
+                // Revert the toggle on error
+                toggleElement.checked = !isNowActive;
+                
+                // Show error notification
+                showStatusUpdateNotification(formId, isNowActive, false, 'Network error occurred');
+            } finally {
+                // Re-enable the toggle
+                toggleElement.disabled = false;
+            }
+        }
+
+        // Show status update notification
+        function showStatusUpdateNotification(formId, isActive, success = true, errorMessage = '') {
+            // Create notification element
+            const notification = document.createElement('div');
+            const bgColor = success ? 'bg-green-500' : 'bg-red-500';
+            const icon = success 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+            
+            const message = success 
+                ? `Form ${formId} status updated to ${isActive ? 'Active' : 'Inactive'}`
+                : `Failed to update form ${formId}: ${errorMessage}`;
+            
+            notification.className = `fixed top-20 right-4 z-50 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${icon}
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Animate out and remove (longer duration for error messages)
+            const duration = success ? 3000 : 5000;
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
     </script>
 </body>
 </html>

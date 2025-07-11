@@ -35,7 +35,7 @@ class FormstackClient:
             "Content-Type": "application/json"
         }
 
-    def _make_request(self, method, endpoint, params=None):
+    def _make_request(self, method, endpoint, params=None, use_form_data=False):
         """
         Internal method to make an HTTP request to the Formstack API.
 
@@ -44,7 +44,8 @@ class FormstackClient:
             endpoint (str): The API endpoint (e.g., "form", "form/123/submission").
             params (dict, optional): Dictionary of parameters for the request.
                                      For GET, these are query parameters.
-                                     For POST/PUT, these are JSON body. Defaults to None.
+                                     For POST/PUT, these are JSON body or form data. Defaults to None.
+            use_form_data (bool): If True, send data as form-encoded rather than JSON.
 
         Returns:
             dict: The JSON response from the API.
@@ -60,9 +61,19 @@ class FormstackClient:
             if method == "GET":
                 response = requests.get(url, headers=self.headers, params=params)
             elif method == "POST":
-                response = requests.post(url, headers=self.headers, json=params)
+                if use_form_data:
+                    # For form updates, use form-encoded data with Bearer token in header
+                    headers = {"Authorization": f"Bearer {self.API_KEY}"}
+                    response = requests.post(url, headers=headers, data=params)
+                else:
+                    response = requests.post(url, headers=self.headers, json=params)
             elif method == "PUT":
-                response = requests.put(url, headers=self.headers, json=params)
+                if use_form_data:
+                    # For form updates, use form-encoded data with Bearer token in header
+                    headers = {"Authorization": f"Bearer {self.API_KEY}"}
+                    response = requests.put(url, headers=headers, data=params)
+                else:
+                    response = requests.put(url, headers=self.headers, json=params)
             elif method == "DELETE":
                 response = requests.delete(url, headers=self.headers, params=params)
             else:
@@ -100,24 +111,56 @@ class FormstackClient:
         """
         Fetches all forms from the Formstack account, including creation and
         last submission times directly from the form object.
+        Handles pagination to ensure all forms are retrieved.
 
         Returns:
             list: A list of dictionaries, where each dictionary represents a form.
                   Returns an empty list if no forms are found or an error occurs.
         """
         print("Fetching all forms...")
+        all_forms = []
+        page = 1
+        per_page = 100  # Maximum allowed by Formstack API
+        
         try:
-            # The Formstack API's GET /form endpoint returns a dictionary
-            # with a 'forms' key containing the list of forms.
-            # We are also adding 'folders=false' to the URL to explicitly get forms without nesting.
-            response_data = self._make_request("GET", "form.json", params={"folders": "false"})
+            while True:
+                print(f"Fetching page {page} (up to {per_page} forms per page)...")
+                
+                # The Formstack API's GET /form endpoint returns a dictionary
+                # with a 'forms' key containing the list of forms.
+                params = {
+                    "folders": "false",
+                    "page": page,
+                    "per_page": per_page
+                }
+                
+                response_data = self._make_request("GET", "form.json", params=params)
+                
+                if isinstance(response_data, dict) and 'forms' in response_data and isinstance(response_data['forms'], list):
+                    forms_on_page = response_data['forms']
+                    
+                    if not forms_on_page:
+                        # No more forms, we've reached the end
+                        print(f"No more forms found on page {page}. Pagination complete.")
+                        break
+                    
+                    all_forms.extend(forms_on_page)
+                    print(f"Retrieved {len(forms_on_page)} forms from page {page}. Total so far: {len(all_forms)}")
+                    
+                    # Check if we got fewer forms than requested, indicating this is the last page
+                    if len(forms_on_page) < per_page:
+                        print(f"Last page reached (got {len(forms_on_page)} < {per_page}). Pagination complete.")
+                        break
+                    
+                    page += 1
+                else:
+                    # Handle unexpected response structure
+                    print(f"Unexpected response format for GET /form page {page}: {response_data}")
+                    break
             
-            if isinstance(response_data, dict) and 'forms' in response_data and isinstance(response_data['forms'], list):
-                return response_data['forms']
-            else:
-                # Handle unexpected response structure
-                print(f"Unexpected response format for GET /form: {response_data}")
-                return []
+            print(f"Successfully retrieved {len(all_forms)} total forms across {page} page(s)")
+            return all_forms
+            
         except Exception as e:
             print(f"Error fetching all forms: {e}")
             return []
@@ -430,6 +473,35 @@ class FormstackClient:
         except Exception as e:
             print(f"Error fetching SmartList details for ID {smartlist_id}: {e}")
             return {}
+
+    def update_form_status(self, form_id, active_status):
+        """
+        Updates the active/inactive status of a specific form.
+        
+        Args:
+            form_id (int or str): The ID of the form to update.
+            active_status (bool): True to make the form active, False to make it inactive.
+            
+        Returns:
+            dict: The JSON response from the API containing the updated form data.
+            
+        Raises:
+            requests.exceptions.RequestException: If the API request fails.
+        """
+        # Convert boolean to the string format expected by Formstack API
+        active_value = "1" if active_status else "0"
+        
+        # Formstack API expects form data for updates
+        update_data = {
+            "active": active_value
+        }
+        
+        try:
+            response = self._make_request("PUT", f"form/{form_id}", update_data, use_form_data=True)
+            return response
+        except requests.exceptions.RequestException as e:
+            print(f"Error updating form {form_id} status: {e}")
+            raise
 
 
 # Example Usage (for testing purposes when running this file directly)

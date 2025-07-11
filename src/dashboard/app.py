@@ -1,5 +1,5 @@
 # src/dashboard/app.py
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from src.api.formstack_client import FormstackClient
 from src.analysis.form_analyzer import FormAnalyzer
 from src.analysis.folder_analyzer import FolderAnalyzer
@@ -385,6 +385,53 @@ def smartlist_details(smartlist_id):
         print(f"An unexpected error occurred in SmartList details route: {e}")
 
     return render_template('smartlist-details.html', smartlist=smartlist_data, error=error_message)
+
+@app.route('/api/update-form-status', methods=['POST'])
+def update_form_status():
+    """
+    API endpoint to update a form's active/inactive status.
+    
+    Expects JSON body with:
+    - form_id: The ID of the form to update
+    - active: Boolean indicating whether the form should be active
+    
+    Returns:
+    - JSON response with success status and updated form data
+    """
+    try:
+        # Get JSON data from request body
+        data = request.get_json()
+        
+        if not data:
+            return {'success': False, 'error': 'No JSON data provided'}, 400
+            
+        form_id = data.get('form_id')
+        active_status = data.get('active')
+        
+        # Validate required fields
+        if form_id is None:
+            return {'success': False, 'error': 'form_id is required'}, 400
+        if active_status is None:
+            return {'success': False, 'error': 'active status is required'}, 400
+            
+        # Initialize Formstack client
+        client = FormstackClient()
+        
+        # Update the form status via Formstack API
+        updated_form = client.update_form_status(form_id, active_status)
+        
+        return {
+            'success': True, 
+            'message': f'Form {form_id} status updated successfully',
+            'form': updated_form
+        }
+        
+    except Exception as e:
+        print(f"Error updating form status: {e}")
+        return {
+            'success': False, 
+            'error': f'Failed to update form status: {str(e)}'
+        }, 500
 
 if __name__ == '__main__':
     # Run the Flask development server
